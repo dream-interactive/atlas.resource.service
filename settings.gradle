@@ -1,5 +1,0 @@
-rootProject.name = 'Atlas'
-include 'core'
-include 'inner-api'
-include 'open-api'
-
