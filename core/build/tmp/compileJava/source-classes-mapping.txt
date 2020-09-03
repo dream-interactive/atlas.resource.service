@@ -1,0 +1,3 @@
+com/atlas/core/AtlasApplication.java
+ com.atlas.core.AtlasApplication
+ com.atlas.core.Test
