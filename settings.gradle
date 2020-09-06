@@ -1,0 +1,5 @@
+rootProject.name = 'atlas.resource.service'
+include 'core'
+include 'inner-api'
+include 'open-api'
+
