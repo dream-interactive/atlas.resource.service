@@ -1,0 +1,51 @@
+plugins {
+    id 'java-library'
+    id 'org.springframework.boot' version "2.3.2.RELEASE"
+    id 'io.spring.dependency-management' version "1.0.9.RELEASE"
+}
+repositories {
+    mavenCentral()
+}
+subprojects {
+
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'java-library'
+    apply plugin: 'java'
+
+    group = 'com.atlas'
+    version = '0.0.1-SNAPSHOT'
+    sourceCompatibility = '11'
+
+    repositories {
+        mavenCentral()
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+}
+bootJar {
+    enabled = false
+}
+
+
+task cleanAll (){
+    dependsOn("clean")
+    dependsOn(":core:clean")
+    dependsOn(":inner-api:clean")
+    dependsOn(":open-api:clean")
+}
+
+task buildAll(){
+    dependsOn(":core:build")
+    dependsOn("build")
+}
+
+buildAll.mustRunAfter(cleanAll)
+
+task stage(){
+    dependsOn("cleanAll")
+    dependsOn("buildAll")
+}
