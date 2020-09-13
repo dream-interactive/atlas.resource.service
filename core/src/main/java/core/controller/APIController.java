@@ -6,16 +6,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
-
+ // class for test
+//
 
 @RestController
 @RequestMapping(path = "api", produces = MediaType.APPLICATION_JSON_VALUE)
 public class APIController {
 
     @GetMapping(value = "/public")
-    public Mono<String> publicEndpoint() {
-        return Mono.just(" All good. You DO NOT need to be authenticated to call /api/public.");
-       // return Mono.just(new Message(" All good. You DO NOT need to be authenticated to call /api/public."));
+    public Mono<Message> publicEndpoint() {
+        return Mono.just(new Message(" All good. You DO NOT need to be authenticated to call /api/public."));
     }
 
     @GetMapping(value = "/private")

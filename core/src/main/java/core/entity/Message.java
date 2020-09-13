@@ -1,3 +1,7 @@
+
+// Class for test
+
+
 package core.entity;
 
 public class Message {

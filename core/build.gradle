@@ -5,7 +5,7 @@ dependencies {
     implementation 'org.springframework.security:spring-security-config'
     implementation 'org.springframework.security:spring-security-oauth2-resource-server'
     implementation 'org.springframework.security:spring-security-oauth2-jose'
-   // api project(":inner-api")
+    api project(":inner-api")
     api project(":open-api")
 
     testImplementation('org.springframework.boot:spring-boot-starter-test') {

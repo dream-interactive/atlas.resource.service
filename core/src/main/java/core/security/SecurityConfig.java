@@ -30,8 +30,8 @@ public class SecurityConfig {
         return http
                 .authorizeExchange()
                 .pathMatchers("/api/public").permitAll()
-                .pathMatchers("/api/private").authenticated()
-                .pathMatchers("/api/private-scoped").hasAuthority("SCOPE_read:messages")
+                .pathMatchers("/api/private","/user","/user/*").authenticated()
+                .pathMatchers("/api/private-scoped").hasAuthority("SCOPE_read:actions")
                 .and()
                 .oauth2ResourceServer()
                 .jwt().and().and().build();

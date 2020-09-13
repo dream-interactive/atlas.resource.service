@@ -2,6 +2,7 @@ package core;
 
 
 //import api.dto.TestInnerApi;
+import api.dto.TestInnerApi;
 import api.dto.TestOpenApi;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,15 +16,15 @@ public class AtlasApplication{
     }
 }
 
-@RestController
 
+@RestController
 class Test{
     @GetMapping("open-api")
     public String openTest(){
      return new TestOpenApi().testFromOpenApi();
     }
-  //  @GetMapping("inner-api")
-   // public String innerTest(){
-  //      return new TestInnerApi().testFromInnerApi();
-  //  }
+    @GetMapping("inner-api")
+    public String innerTest(){
+        return new TestInnerApi().testFromInnerApi();
+    }
 }
