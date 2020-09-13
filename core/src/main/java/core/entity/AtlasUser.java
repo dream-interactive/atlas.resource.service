@@ -1,25 +1,29 @@
 package core.entity;
 
-import java.util.UUID;
+import org.springframework.data.annotation.Id;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Table("atlas_user")
 public class AtlasUser {
-
+    @Id
+    @Column("user_id")
     private int id;
-    private String firstName;
-    private String lastName;
+    private String username;
+    private String password;
     private String email;
 
-    public AtlasUser(int id, String firstName, String lastName, String email) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-    }
+/*
     public int getId() {
         return this.id;
     }
-
     public String getFirstName() {
         return firstName;
     }
@@ -37,5 +41,5 @@ public class AtlasUser {
     }
     public void setEmail(String email) {
         this.email = email;
-    }
+    }*/
 }

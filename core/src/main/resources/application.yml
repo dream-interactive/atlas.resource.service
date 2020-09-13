@@ -1,6 +1,6 @@
 debug: true
 server:
-  port: 3010
+  port: 9000
 
 auth0:
   # Replace with the API Identifier for your Auth0 API.
@@ -15,3 +15,29 @@ spring:
           # Replace with the domain of your Auth0 tenant.
           # Note the trailing slash is important!
           issuer-uri: https://atlas-s.eu.auth0.com/
+
+  r2dbc:
+    # url: r2dbc:postgresql://ec2-34-251-118-151.eu-west-1.compute.amazonaws.com:5432/d8g1sr68qsfuqi
+    # password: bd481e7581e264f62651c238e1ab6f7e44da59eab74024ad88bf7aa6693cef5b
+    # username: qpsdonwfrqqzcw
+    url: r2dbc:postgresql://localhost:5432/Atlas.db
+    password: coolbaba881
+    username: postgres
+    pool:
+      enabled: true
+      initial-size: 10
+      max-idle-time: 1m
+      max-size: 30
+
+logging:
+  level:
+    .: INFO
+    org.springframework:
+      data:
+        r2dbc: DEBUG
+    core: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"
+    file: "%d %p %c{1.} [%t] %m%n"
+  file:
+    name: logs/atlas.log
