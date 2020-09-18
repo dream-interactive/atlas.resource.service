@@ -1,11 +1,14 @@
 package core.entity;
 
-import org.springframework.data.annotation.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
+
+import java.time.ZonedDateTime;
+import java.util.UUID;
 
 
 @Data
@@ -13,10 +16,13 @@ import org.springframework.data.relational.core.mapping.Table;
 @NoArgsConstructor
 @Table("atlas_user")
 public class AtlasUser {
+
     @Id
-    @Column("id")
-    private long id;
-    private String username;
-    private String password;
+    @Column("user_id")
+    private UUID id;
+    private String sub;
     private String email;
+
+    @Column("last_modify")
+    private ZonedDateTime lastModify; // The last modify of the row in table
 }

@@ -1,8 +1,9 @@
+
 create table atlas_user(
-    "id" bigserial UNIQUE,
-    "username" varchar not null,
-    "email" varchar not null,
-    "password" varchar not null
+    "user_id" UUID  primary key unique default gen_random_uuid(),
+    "sub" varchar(255) not null,
+    "email" varchar(255) not null,
+    "last_modify" timestamp with time zone default current_timestamp
 )
 
 
