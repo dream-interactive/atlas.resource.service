@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
+
 /**
  * Configures our application with Spring Security to restrict access to our API endpoints.
  */
@@ -21,16 +22,19 @@ public class SecurityConfig {
     @Value("${auth0.audience}")
     private String audience;
 
+
+
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
+
         /*
         This is where we configure the security required for our endpoints and setup our app to serve as
         an OAuth2 Resource Server, using JWT validation.
         */
         return http
                 .authorizeExchange()
-                .pathMatchers("/user").permitAll()
-                .pathMatchers("/user/*").authenticated()
+                .pathMatchers("/users").permitAll()
+                .pathMatchers("/users/*").authenticated()
               //  .pathMatchers("/api/private-scoped").hasAuthority("SCOPE_read:actions")
                 .and()
                 .oauth2ResourceServer()
@@ -56,4 +60,14 @@ public class SecurityConfig {
 
         return jwtDecoder;
     }
+
+    private final String issuerl;
+    private final String clientId;
+
+    public SecurityConfig(@Value("${spring.security.oauth2.client.provider.auth0.issuer-uri}") String issuerl,
+                          @Value("${spring.security.oauth2.client.registration.auth0.client-id}") String clientId) {
+        this.issuerl = issuerl;
+        this.clientId = clientId;
+    }
+
 }

@@ -14,32 +14,9 @@ import org.springframework.data.relational.core.mapping.Table;
 @Table("atlas_user")
 public class AtlasUser {
     @Id
-    @Column("user_id")
-    private int id;
+    @Column("id")
+    private long id;
     private String username;
     private String password;
     private String email;
-
-/*
-    public int getId() {
-        return this.id;
-    }
-    public String getFirstName() {
-        return firstName;
-    }
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-    public String getLastName() {
-        return lastName;
-    }
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-    public String getEmail() {
-        return email;
-    }
-    public void setEmail(String email) {
-        this.email = email;
-    }*/
 }
