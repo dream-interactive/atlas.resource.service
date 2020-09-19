@@ -2,6 +2,7 @@ package core.handler;
 
 import core.entity.AtlasUser;
 import core.repository.AtlasUserRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -10,16 +11,16 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
 import java.util.Optional;
+import java.util.UUID;
 
 @Component
-public class AtlasUserHandlerImp implements AtlasUserHandler {
+@AllArgsConstructor
+public class AtlasUserHandlerImpl implements AtlasUserHandler {
 
   private final AtlasUserRepository userRepository;
 
-  public AtlasUserHandlerImp(AtlasUserRepository userRepository) {
-    this.userRepository = userRepository;
-  }
 
   // public Mono<ServerResponse> getByUserId(ServerRequest request) {
   //    Long userId = Long.parseLong(request.pathVariable("id"));
@@ -34,14 +35,15 @@ public class AtlasUserHandlerImp implements AtlasUserHandler {
 
   public Mono<ServerResponse> save(ServerRequest request) {
 
-    Mono<AtlasUser> user = request
-                            .bodyToMono(AtlasUser.class)
-                            .flatMap(userRepository::save);
-
-    return ServerResponse
-            .ok()
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(user, AtlasUser.class);
+    return request
+            .bodyToMono(AtlasUser.class) // Mono<AtlasUser> from request
+            .flatMap(userRepository::save)  // Mono<AtlasUser> from repository
+            .flatMap(user -> { // USER
+              return ServerResponse
+                      .created(URI.create(request.uri() + "/" + user.getId()))
+                      .contentType(MediaType.APPLICATION_JSON)
+                      .body(Mono.just(user), AtlasUser.class);  // Mono<AtlasUser>
+            }); // Mono<ServerResponse> from repository
   }
 
   @Override

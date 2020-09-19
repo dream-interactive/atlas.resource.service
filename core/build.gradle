@@ -13,16 +13,13 @@ dependencies {
     runtimeOnly 'io.r2dbc:r2dbc-postgresql'
     runtimeOnly 'org.postgresql:postgresql'
 
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-
-
     api project(":inner-api")
     api project(":open-api")
 
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
+    testImplementation('org.springframework.security:spring-security-test')
 }
 
 bootJar {
