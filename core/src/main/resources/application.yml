@@ -7,6 +7,8 @@ auth0:
 
 # The following is standard Spring Security OAuth2 configuration.
 spring:
+  application:
+    name: atlas-service
   security:
     oauth2:
       resourceserver:
