@@ -1,7 +1,7 @@
 spring:
   cloud:
     config:
-      uri: http://localhost:10000
+      uri: http://${CONFIG_HOST}:${CONFIG_PORT}
   profiles:
     active: dev
   application:

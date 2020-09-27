@@ -1,3 +1,4 @@
+CREATE EXTENSION pgcrypto;
 
 create table atlas_user(
     "user_id" UUID  primary key unique default gen_random_uuid(),
