@@ -1,6 +1,10 @@
 server:
   port: 9000
 
+cors:
+  domain:
+    uri: http://localhost:4200
+
 auth0:
   # Replace with the API Identifier for your Auth0 API.
   audience: https://atlas-s.eu.auth0.com/api/v2/
