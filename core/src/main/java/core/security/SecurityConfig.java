@@ -33,8 +33,8 @@ public class SecurityConfig {
         */
         return http
                 .authorizeExchange()
-                .pathMatchers("/users").permitAll()
-                .pathMatchers("/users/*").authenticated()
+               // .pathMatchers("/users").permitAll()
+                .pathMatchers("/users").authenticated()
               //  .pathMatchers("/api/private-scoped").hasAuthority("SCOPE_read:actions")
                 .and()
                 .oauth2ResourceServer()
