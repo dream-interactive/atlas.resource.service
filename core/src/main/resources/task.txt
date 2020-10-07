@@ -1,0 +1,32 @@
+таблица organization
+таблица project
+таблица epics
+таблица stories
+таблица tasks
+таблица sprint
+
+
+Создать проект долька в организации апельсин.
+
+долька = {
+            ...,
+            organizationId,
+            projectKey
+        }
+
+запись в таблицу project
+находим название организации (valid_name) по id
+создание таблицы [orgName]_[projectKey]_tasks // апельсин_долька_tasks
+
+projectKey | number (autoincrement) | task_type | task_uuid
+
+в зависимости от типа задания запись в таблицу epics / stories / tasks
+
+
+short_description | long_description | creator | assignee | story_point
+
+
+
+
+
+

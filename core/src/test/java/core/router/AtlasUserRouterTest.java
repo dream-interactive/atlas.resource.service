@@ -1,7 +1,7 @@
 package core.router;
 
 import core.entity.AtlasUser;
-import core.handler.AtlasUserHandlerImpl;
+import core.handler.impl.AtlasUserHandlerImpl;
 import core.repository.AtlasUserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
