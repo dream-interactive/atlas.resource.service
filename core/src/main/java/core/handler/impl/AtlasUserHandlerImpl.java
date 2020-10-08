@@ -1,6 +1,7 @@
-package core.handler;
+package core.handler.impl;
 
 import core.entity.AtlasUser;
+import core.handler.AtlasUserHandler;
 import core.repository.AtlasUserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;

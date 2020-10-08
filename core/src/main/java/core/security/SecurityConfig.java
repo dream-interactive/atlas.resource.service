@@ -33,9 +33,9 @@ public class SecurityConfig {
         */
         return http
                 .authorizeExchange()
-               // .pathMatchers("/users").permitAll()
-                .pathMatchers("/users").authenticated()
+               // .pathMatchers("iwuerokffd").permitAll()
               //  .pathMatchers("/api/private-scoped").hasAuthority("SCOPE_read:actions")
+                .anyExchange().authenticated()
                 .and()
                 .oauth2ResourceServer()
                 .jwt().and().and().build();

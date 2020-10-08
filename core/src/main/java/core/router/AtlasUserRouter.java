@@ -16,7 +16,7 @@ public class AtlasUserRouter implements AtlasUserEndpoints {
 
     private final AtlasUserHandler handler;
 
-    @Bean
+    @Bean("AtlasUserRoutes")
     public RouterFunction<ServerResponse> route() {
         return RouterFunctions
                 .route(findAll, handler::findAll)
