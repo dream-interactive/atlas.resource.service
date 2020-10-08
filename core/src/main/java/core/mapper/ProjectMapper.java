@@ -13,4 +13,5 @@ public abstract class ProjectMapper {
 
     @Mapping(target = "lastModify", ignore = true)
     public abstract Project toEntity (ProjectDTO dto);
+
 }
