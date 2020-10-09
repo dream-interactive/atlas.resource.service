@@ -62,6 +62,8 @@ class ProjectControllerTest {
                 .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
         Mockito.when(repository.findByOrganizationIdAndKey(UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),"PRJC"))
                 .thenReturn(Mono.empty());
+        Mockito.when(repository.findById(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
+                .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
 
 
         webTestClient
@@ -153,7 +155,8 @@ class ProjectControllerTest {
 
         Mockito.when(repository.findByOrganizationIdAndKey(UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),"PRJC"))
                 .thenReturn(Mono.just(projectDTO).map(mapper::toEntity));
-
+        Mockito.when(repository.findById(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
+                .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
 
         webTestClient
                 .mutateWith(csrf())

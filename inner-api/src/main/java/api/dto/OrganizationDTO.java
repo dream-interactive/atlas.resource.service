@@ -15,5 +15,6 @@ public class OrganizationDTO {
     private String name;
     private String validName;
     private String ownerUserId;
+    private String img;
 
 }

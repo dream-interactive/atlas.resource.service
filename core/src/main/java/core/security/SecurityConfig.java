@@ -32,6 +32,8 @@ public class SecurityConfig {
         an OAuth2 Resource Server, using JWT validation.
         */
         return http
+                .cors()
+                .and()
                 .authorizeExchange()
                // .pathMatchers("iwuerokffd").permitAll()
               //  .pathMatchers("/api/private-scoped").hasAuthority("SCOPE_read:actions")

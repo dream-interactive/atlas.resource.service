@@ -27,6 +27,8 @@ public class Organization {
     @Column("owner_user_id")
     private String ownerUserId;
 
+    private String img;
+
     // The last modify of the row in table
     @Column("last_modify")
     private ZonedDateTime lastModify;
