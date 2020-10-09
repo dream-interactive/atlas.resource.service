@@ -1,6 +1,7 @@
 package core.service;
 
 import api.dto.ProjectDTO;
+import core.entity.Project;
 import core.exception.CustomRequestException;
 import core.mapper.ProjectMapper;
 import core.repository.ProjectRepository;
@@ -10,7 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.UUID;
 
 @Service
 @AllArgsConstructor
@@ -20,6 +24,7 @@ public class ProjectService {
     private final ProjectRepository repository;
     private final ProjectMapper mapper;
 
+    // @formatter:off
     public Mono<ProjectDTO> save (Mono<ProjectDTO> projectDTOMono){
 
         return projectDTOMono
@@ -41,15 +46,30 @@ public class ProjectService {
                                     );
                                 }
                                 log.debug(" @method [ Mono<ProjectDTO> save (Mono<ProjectDTO> projectDTOMono) ] -> @call repository.save(project)");
-                                return repository.save(project).map(saved -> {
-                                    log.debug(" @method [ Mono<ProjectDTO> save (Mono<ProjectDTO> projectDTOMono) ] -> @body after @call repository.save(project): " + saved);
-                                    ProjectDTO projectDTO = mapper.toDTO(saved);
-                                    log.debug(" @method [ Mono<ProjectDTO> save (Mono<ProjectDTO> projectDTOMono) ] -> @body after @call mapper.toDTO(saved) : " + projectDTO);
-                                    return projectDTO;
-                                });
+                                return repository.save(project)
+                                        .flatMap(saved -> {
+                                            log.debug(" @method [ Mono<ProjectDTO> save (Mono<ProjectDTO> projectDTOMono) ] -> @body after @call repository.save(project): " + saved);
+                                            Mono<Project> findById = repository.findById(saved.getId());
+                                            return findById.map(found -> {
+                                                log.debug(" @method [ Mono<ProjectDTO> save (Mono<ProjectDTO> projectDTOMono) ] -> @body after @call repository.findById(saved.getId()) : " + found);
+                                                ProjectDTO projectDTO = mapper.toDTO(found);
+                                                log.debug(" @method [ Mono<ProjectDTO> save (Mono<ProjectDTO> projectDTOMono) ] -> @body after @call mapper.toDTO(found) : " + projectDTO);
+                                                return projectDTO;
+                                            });
+                                        });
                             });
                 });
     }
+    // @formatter:on
+    public Mono<Boolean> existsByOrganizationIdAndName(UUID organizationId, String projectName) {
+        log.debug(" @method [ Mono<Boolean> existsByOrganizationIdAndName(UUID organizationId, String projectName) ] -> " +
+                "@params [organizationId: " + organizationId +  ", @param projectName: " + projectName + "] -> " +
+                "@call repository.existsByOrganizationIdAndName(organizationId, projectName)");
+        return repository.existsByOrganizationIdAndName(organizationId, projectName);
+    }
+    public Flux<ProjectDTO> findByUserId(String id) {
 
+        return null;
+    }
 
 }
