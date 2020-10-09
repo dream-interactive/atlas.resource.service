@@ -47,7 +47,7 @@ insert into project_type (type) values ('KANBAN');
 
 create table if not exists project
 (
-    project_id UUID default gen_random_uuid() not null,
+    project_id UUID default gen_random_uuid() unique not null,
     name  varchar(100)  not null,
     key  varchar(5)  not null,
     project_type_id  int  not null,

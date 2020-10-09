@@ -19,8 +19,10 @@ public class Project {
     @Id
     @Column("project_id")
     private UUID id;
+
     private String name;
     private String key;
+
     @Column("organization_id")
     private UUID organizationId;
 
@@ -29,6 +31,11 @@ public class Project {
 
     @Column("lead_user_id")
     private String leadId;
+
+    private String img;
+
+    @Column("is_private")
+    private Boolean isPrivate;
 
     @Column("last_modify")
     private ZonedDateTime lastModify; // The last modify of the row in table
