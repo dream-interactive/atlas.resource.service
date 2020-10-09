@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
@@ -75,27 +76,15 @@ public class OrganizationService {
         return repository.deleteById(organizationId);
     }
 
-    public boolean existByValidName(String validName) {
+    public Mono<Boolean> existByValidName(String validName) {
 
-        // TODO complete boolean method or change to some other
-        // may produce null pointer exception
-        return repository.findByValidName(validName).blockOptional().isPresent();
+        return repository.findByValidName(validName).hasElement();
 
-        /* hz
-        return repository.findByValidName(validName)
-                .flatMap(isPresent -> {
-                    if (isPresent == null) {
-                        return Mono.error(
-                                new CustomRequestException(
-                                        "ERROR ATLAS-2: Organization with this name already exists.",
-                                        HttpStatus.CONFLICT)
-                        );
-                    }
+    }
 
-                    return repository.findByValidName(validName).map(mapper::toDTO);
-                });
+    public Flux<OrganizationDTO> findAllByUserId(String userId) {
 
-         */
+        return repository.findAllByOwnerUserId(userId).map(mapper::toDTO);
 
     }
 

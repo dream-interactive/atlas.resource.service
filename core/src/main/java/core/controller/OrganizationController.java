@@ -7,6 +7,7 @@ import core.service.OrganizationService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
@@ -38,7 +39,12 @@ public class OrganizationController implements OrganizationEndpoints {
     }
 
     @Override
-    public boolean existByValidName(String validName) {
+    public Mono<Boolean> existByValidName(String validName) {
         return service.existByValidName(validName);
+    }
+
+    @Override
+    public Flux<OrganizationDTO> findAllByUserId(String userId) {
+        return service.findAllByUserId(userId);
     }
 }

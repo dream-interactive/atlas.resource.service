@@ -19,6 +19,8 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -211,18 +213,59 @@ class OrganizationControllerTest {
 
         // TODO finish him
 
-        String validName = "Valid-Name";
+//        Mockito.when(repository.findByValidName("Valid-Name").hasElement())
+//                .thenReturn(Mono.just(true));
+
+        Mono<Boolean> just = Mono.just(true);
 
         webTestClient
                 .mutateWith(csrf())
                 .get()
-                .uri("/api/organizations/exists/{validName}", validName)
+                .uri("/api/organizations/exists/{validName}", "Valid-Name")
                 .exchange()
-                .expectStatus().isOk();
-//                .expectBody(Boolean.class)
-//                .consumeWith(result -> {
-//                    Assertions.assertEquals(result, true);
-//                });
+                .expectStatus().isOk()
+                .expectBody(Mono.class)
+                .consumeWith(result -> {
+                    Assertions.assertEquals(result.getResponseBody(), just);
+                });
 
     }
+
+    @Test
+    @WithMockUser
+    void testFindAllByUserIdOrganization() {
+
+        // TODO this bullshit needs to be finished too
+
+        Flux<OrganizationDTO> organizationDTOFlux = Flux.just(
+                new OrganizationDTO(
+                        UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
+                        "Organization Name",
+                        "Organization-Name",
+                        "8d43405ef-eb60-47c9-88ed-f4a732a1eab"
+                ),
+                new OrganizationDTO(
+                        UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
+                        "Organization Name2",
+                        "Organization-Name2",
+                        "8d43405ef-eb60-47c9-88ed-f4a732a1eab"
+                )
+        );
+
+        Mockito.when(repository.findAllByOwnerUserId("8d43405ef-eb60-47c9-88ed-f4a732a1eab").map(mapper::toDTO))
+                .thenReturn(organizationDTOFlux);
+
+        webTestClient
+                .mutateWith(csrf())
+                .get()
+                .uri("/api/organizations/users/{userId}", "8d43405ef-eb60-47c9-88ed-f4a732a1eab")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Flux.class)
+                .consumeWith(result -> {
+                        Assertions.assertEquals(result.getResponseBody(), organizationDTOFlux);
+                });
+
+    }
+
 }
