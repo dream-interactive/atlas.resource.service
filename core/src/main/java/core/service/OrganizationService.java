@@ -44,11 +44,15 @@ public class OrganizationService {
                                     );
                                 }
                                 log.debug(" @method [ Mono<OrganizationDTO> save (Mono<OrganizationDTO> organizationDTOMono) ] -> @call repository.save(organization)");
-                                return repository.save(organization).map(saved -> {
-                                    log.debug(" @method [ Mono<OrganizationDTO> save (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call repository.save(organization): " + saved);
-                                    OrganizationDTO organizationDTO = mapper.toDTO(saved);
-                                    log.debug(" @method [ Mono<OrganizationDTO> save (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call mapper.toDTO(saved) : " + organizationDTO);
-                                    return organizationDTO;
+                                return repository.save(organization).flatMap(saved -> {
+                                    log.debug(" @method [ Mono<OrganizationDTO> save (Mono<OrganizationDTO> organizationDTOMono) ] ->  @body after @call repository.save(organization): " + saved);
+                                    Mono<Organization> findById = repository.findById(saved.getId());
+                                    return findById.map(found -> {
+                                        log.debug(" @method [ Mono<OrganizationDTO> save (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call repository.findById(organization): " + found);
+                                        OrganizationDTO organizationDTO = mapper.toDTO(found);
+                                        log.debug(" @method [ Mono<OrganizationDTO> save (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call mapper.toDTO(saved) : " + organizationDTO);
+                                        return organizationDTO;
+                                    });
                                 });
                             });
                 });
@@ -77,16 +81,11 @@ public class OrganizationService {
     }
 
     public Mono<Boolean> existByValidName(String validName) {
-
         return repository.findByValidName(validName).hasElement();
-
     }
 
     public Flux<OrganizationDTO> findAllByUserId(String userId) {
-
         return repository.findAllByOwnerUserId(userId).map(mapper::toDTO);
-
     }
-
 
 }

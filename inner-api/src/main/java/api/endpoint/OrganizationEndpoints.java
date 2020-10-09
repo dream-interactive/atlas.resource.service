@@ -36,12 +36,12 @@ public interface OrganizationEndpoints {
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     Mono<Void> delete(@PathVariable(value = "id") UUID id);
 
-    @GetMapping(value = "/exists/{validName}")
+    @GetMapping(params = "validName")
     @ResponseStatus(code = HttpStatus.OK)
-    Mono<Boolean> existByValidName(@PathVariable(value = "validName") String validName);
+    Mono<Boolean> existByValidName(@RequestParam(value = "validName") String validName);
 
-    @GetMapping(value = "/users/{userId}")
+    @GetMapping(params = "userId")
     @ResponseStatus(code = HttpStatus.OK)
-    Flux<OrganizationDTO> findAllByUserId(@PathVariable(value = "userId") String userId);
+    Flux<OrganizationDTO> findAllByUserId(@RequestParam(value = "userId") String userId);
 
 }

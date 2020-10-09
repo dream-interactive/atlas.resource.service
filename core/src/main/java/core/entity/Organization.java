@@ -21,8 +21,10 @@ public class Organization {
     @Column("organization_id")
     private UUID id;
     private String name;
+    @Column("valid_name")
     private String validName;
     // owner user
+    @Column("owner_user_id")
     private String ownerUserId;
 
     // The last modify of the row in table

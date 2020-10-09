@@ -1,6 +1,7 @@
 package core.controller;
 
 import api.dto.OrganizationDTO;
+import core.entity.Organization;
 import core.exception.CustomExceptionHandler;
 import core.mapper.OrganizationMapper;
 import core.mapper.OrganizationMapperImpl;
@@ -19,8 +20,6 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -61,6 +60,8 @@ class OrganizationControllerTest {
                 .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
         Mockito.when(repository.findByValidName("Organization-Name"))
                 .thenReturn(Mono.empty());
+        Mockito.when(repository.findById(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
+                .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
 
         webTestClient
                 .mutateWith(csrf())
@@ -72,10 +73,10 @@ class OrganizationControllerTest {
                 .expectStatus().isCreated()
                 .expectBody(OrganizationDTO.class)
                 .consumeWith(result -> {
-                    Assertions.assertEquals(result.getResponseBody().getId(), returnDTO.getId());
-                    Assertions.assertEquals(result.getResponseBody().getName(), returnDTO.getName());
-                    Assertions.assertEquals(result.getResponseBody().getValidName(), returnDTO.getValidName());
-                    Assertions.assertEquals(result.getResponseBody().getOwnerUserId(), returnDTO.getOwnerUserId());
+                    Assertions.assertEquals(returnDTO.getId(), Objects.requireNonNull(result.getResponseBody()).getId());
+                    Assertions.assertEquals(returnDTO.getName(), result.getResponseBody().getName());
+                    Assertions.assertEquals(returnDTO.getValidName(), result.getResponseBody().getValidName());
+                    Assertions.assertEquals(returnDTO.getOwnerUserId(), result.getResponseBody().getOwnerUserId());
                 });
 
     }
@@ -100,8 +101,9 @@ class OrganizationControllerTest {
 
         Mockito.when(repository.findByValidName("Organization-Name"))
                 .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
-
         Mockito.when(repository.save(mapper.toEntity(organizationDTO)))
+                .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
+        Mockito.when(repository.findById(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
                 .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
 
         webTestClient
@@ -136,9 +138,10 @@ class OrganizationControllerTest {
 
         Mockito.when(repository.save(mapper.toEntity(organizationDTO)))
                 .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
-
         Mockito.when(repository.findByValidName("Organization-Name"))
                 .thenReturn(Mono.just(organizationDTO).map(mapper::toEntity));
+        Mockito.when(repository.findById(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
+                .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
 
         webTestClient
                 .mutateWith(csrf())
@@ -150,10 +153,10 @@ class OrganizationControllerTest {
                 .expectStatus().isOk()
                 .expectBody(OrganizationDTO.class)
                 .consumeWith(result -> {
-                    Assertions.assertEquals(result.getResponseBody().getId(), returnDTO.getId());
-                    Assertions.assertEquals(result.getResponseBody().getName(), returnDTO.getName());
-                    Assertions.assertEquals(result.getResponseBody().getValidName(), returnDTO.getValidName());
-                    Assertions.assertEquals(result.getResponseBody().getOwnerUserId(), returnDTO.getOwnerUserId());
+                    Assertions.assertEquals(returnDTO.getId(), Objects.requireNonNull(result.getResponseBody()).getId());
+                    Assertions.assertEquals(returnDTO.getName(), result.getResponseBody().getName());
+                    Assertions.assertEquals(returnDTO.getValidName(), result.getResponseBody().getValidName());
+                    Assertions.assertEquals(returnDTO.getOwnerUserId(), result.getResponseBody().getOwnerUserId());
                 });
 
 
@@ -181,10 +184,10 @@ class OrganizationControllerTest {
                 .expectStatus().isOk()
                 .expectBody(OrganizationDTO.class)
                 .consumeWith(result -> {
-                    Assertions.assertEquals(result.getResponseBody().getId(), organizationDTO.getId());
-                    Assertions.assertEquals(result.getResponseBody().getName(), organizationDTO.getName());
-                    Assertions.assertEquals(result.getResponseBody().getValidName(), organizationDTO.getValidName());
-                    Assertions.assertEquals(result.getResponseBody().getOwnerUserId(), organizationDTO.getOwnerUserId());
+                    Assertions.assertEquals(organizationDTO.getId(), Objects.requireNonNull(result.getResponseBody()).getId());
+                    Assertions.assertEquals(organizationDTO.getName(), result.getResponseBody().getName());
+                    Assertions.assertEquals(organizationDTO.getValidName(), result.getResponseBody().getValidName());
+                    Assertions.assertEquals(organizationDTO.getOwnerUserId(), result.getResponseBody().getOwnerUserId());
                 });
 
     }
@@ -211,23 +214,24 @@ class OrganizationControllerTest {
     @WithMockUser
     void testExistsByValidNameOrganization() {
 
-        // TODO finish him
+        OrganizationDTO returnDTO = new OrganizationDTO(
+                UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
+                "Organization Name",
+                "organization-name",
+                "d43405ef-eb60-47c9-88ed-f4a732a1eab8"
+        );
 
-//        Mockito.when(repository.findByValidName("Valid-Name").hasElement())
-//                .thenReturn(Mono.just(true));
-
-        Mono<Boolean> just = Mono.just(true);
+        Mockito.when(repository.findByValidName("organization-name"))
+                .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
 
         webTestClient
                 .mutateWith(csrf())
                 .get()
-                .uri("/api/organizations/exists/{validName}", "Valid-Name")
+                .uri("/api/organizations?validName=organization-name")
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(Mono.class)
-                .consumeWith(result -> {
-                    Assertions.assertEquals(result.getResponseBody(), just);
-                });
+                .expectBody(Boolean.class)
+                .consumeWith(result -> Assertions.assertTrue(Objects.requireNonNull(result.getResponseBody())));
 
     }
 
@@ -235,37 +239,34 @@ class OrganizationControllerTest {
     @WithMockUser
     void testFindAllByUserIdOrganization() {
 
-        // TODO this bullshit needs to be finished too
-
-        Flux<OrganizationDTO> organizationDTOFlux = Flux.just(
-                new OrganizationDTO(
+        Flux<Organization> organizationFlux = Flux.just(
+                new Organization(
                         UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
                         "Organization Name",
                         "Organization-Name",
-                        "8d43405ef-eb60-47c9-88ed-f4a732a1eab"
+                        "8d43405ef-eb60-47c9-88ed-f4a732a1eab",
+                        null
                 ),
-                new OrganizationDTO(
+                new Organization(
                         UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
                         "Organization Name2",
                         "Organization-Name2",
-                        "8d43405ef-eb60-47c9-88ed-f4a732a1eab"
+                        "8d43405ef-eb60-47c9-88ed-f4a732a1eab",
+                        null
                 )
         );
 
-        Mockito.when(repository.findAllByOwnerUserId("8d43405ef-eb60-47c9-88ed-f4a732a1eab").map(mapper::toDTO))
-                .thenReturn(organizationDTOFlux);
+        Mockito.when(repository.findAllByOwnerUserId("8d43405ef-eb60-47c9-88ed-f4a732a1eab"))
+                .thenReturn(organizationFlux);
 
         webTestClient
                 .mutateWith(csrf())
                 .get()
-                .uri("/api/organizations/users/{userId}", "8d43405ef-eb60-47c9-88ed-f4a732a1eab")
+                .uri("/api/organizations?userId=8d43405ef-eb60-47c9-88ed-f4a732a1eab")
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(Flux.class)
-                .consumeWith(result -> {
-                        Assertions.assertEquals(result.getResponseBody(), organizationDTOFlux);
-                });
-
+                .expectBodyList(Organization.class)
+                .isEqualTo(Objects.requireNonNull(organizationFlux.collectList().block()));
     }
 
 }
