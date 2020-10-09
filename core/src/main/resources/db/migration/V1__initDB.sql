@@ -78,6 +78,8 @@ create table if not exists atlas_errors
     constraint atlas_errors_pkey primary key (code, id)
 );
 insert into atlas_errors (id, title) values ( 1, 'Project with this key already exist in your organization.');
+insert into atlas_errors (id, title) values ( 2, 'Organization with this name already exists.');
+insert into atlas_errors (id, title, description) values ( 3, 'Couldn''t find ''organization'' with id - + $organizationId$', 'Instead of $organizationId$, you need to substitute a variable containing the requested id');
 
 
 
