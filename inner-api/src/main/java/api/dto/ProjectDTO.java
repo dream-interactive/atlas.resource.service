@@ -14,8 +14,9 @@ public class ProjectDTO {
     private String name;
     private String key;
     private UUID organizationId;
-    private Integer typeId;
+    private String type;
     private String leadId;
     private String img;
     private Boolean isPrivate;
+
 }

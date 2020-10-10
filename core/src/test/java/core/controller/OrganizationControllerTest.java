@@ -46,14 +46,16 @@ class OrganizationControllerTest {
                 null,
                 "Organization Name",
                 "Organization-Name",
-                "d43405ef-eb60-47c9-88ed-f4a732a1eab8"
+                "d43405ef-eb60-47c9-88ed-f4a732a1eab8",
+                "img"
         );
 
         OrganizationDTO returnDTO = new OrganizationDTO(
                 UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
                 "Organization Name",
                 "Organization-Name",
-                "d43405ef-eb60-47c9-88ed-f4a732a1eab8"
+                "d43405ef-eb60-47c9-88ed-f4a732a1eab8",
+                "img"
         );
 
         Mockito.when(repository.save(mapper.toEntity(organizationDTO)))
@@ -89,14 +91,16 @@ class OrganizationControllerTest {
                 null,
                 "Organization Name",
                 "Organization-Name",
-                "d43405ef-eb60-47c9-88ed-f4a732a1eab8"
+                "d43405ef-eb60-47c9-88ed-f4a732a1eab8",
+                "img"
         );
 
         OrganizationDTO returnDTO = new OrganizationDTO(
                 UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
                 "Organization Name",
                 "Organization-Name",
-                "d43405ef-eb60-47c9-88ed-f4a732a1eab8"
+                "d43405ef-eb60-47c9-88ed-f4a732a1eab8",
+                "img"
         );
 
         Mockito.when(repository.findByValidName("Organization-Name"))
@@ -126,14 +130,16 @@ class OrganizationControllerTest {
                 UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
                 "Organization Name",
                 "Organization-Name",
-                "d43405ef-eb60-47c9-88ed-f4a732a1eab8"
+                "d43405ef-eb60-47c9-88ed-f4a732a1eab8",
+                "img"
         );
 
         OrganizationDTO returnDTO = new OrganizationDTO(
                 UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
                 "Organization Name",
                 "Organization-Name",
-                "d43405ef-eb60-47c9-88ed-f4a732a1eab8"
+                "d43405ef-eb60-47c9-88ed-f4a732a1eab8",
+                "img"
         );
 
         Mockito.when(repository.save(mapper.toEntity(organizationDTO)))
@@ -170,7 +176,8 @@ class OrganizationControllerTest {
                 UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
                 "Organization Name",
                 "Organization-Name",
-                "8d43405ef-eb60-47c9-88ed-f4a732a1eab"
+                "8d43405ef-eb60-47c9-88ed-f4a732a1eab",
+                "img"
         );
 
         Mockito.when(repository.findById(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
@@ -218,7 +225,8 @@ class OrganizationControllerTest {
                 UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
                 "Organization Name",
                 "organization-name",
-                "d43405ef-eb60-47c9-88ed-f4a732a1eab8"
+                "d43405ef-eb60-47c9-88ed-f4a732a1eab8",
+                "img"
         );
 
         Mockito.when(repository.findByValidName("organization-name"))
@@ -245,6 +253,7 @@ class OrganizationControllerTest {
                         "Organization Name",
                         "Organization-Name",
                         "8d43405ef-eb60-47c9-88ed-f4a732a1eab",
+                        "img",
                         null
                 ),
                 new Organization(
@@ -252,6 +261,7 @@ class OrganizationControllerTest {
                         "Organization Name2",
                         "Organization-Name2",
                         "8d43405ef-eb60-47c9-88ed-f4a732a1eab",
+                        "img",
                         null
                 )
         );
