@@ -19,10 +19,10 @@ insert into org_role (role) values ('OWNER');
 insert into org_role (role) values ('MANAGER');
 insert into org_role (role) values ('MEMBER');
 
-create table if not exists org_user_role
+create table if not exists org_role_member
 (
     organization_id uuid,
-    atlas_user_id varchar,
+    member_id varchar,
     org_role_id int,
 
     constraint fk_org_user_role_organization_id
