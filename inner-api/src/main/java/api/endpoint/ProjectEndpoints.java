@@ -20,7 +20,7 @@ import java.util.UUID;
 @RequestMapping(value = "api/projects", produces = MediaType.APPLICATION_JSON_VALUE)
 public interface ProjectEndpoints {
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(code = HttpStatus.CREATED)
     Mono<ProjectDTO> create(@RequestBody Mono<ProjectDTO> dto);
 
