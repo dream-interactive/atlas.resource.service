@@ -5,7 +5,7 @@ create table if not exists organization
     name  varchar(100) unique not null,
     valid_name varchar(100) unique not null,
     owner_user_id varchar not null,
-    last_modify timestamp with time zone default current_timestampб
+    last_modify timestamp with time zone default current_timestamp,
     img text not null default '../../../assets/images/icon-business-pack/svg/101-laptop.svg'::text
 );
 
