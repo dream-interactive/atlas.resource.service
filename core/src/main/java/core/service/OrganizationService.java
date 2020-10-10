@@ -1,10 +1,13 @@
 package core.service;
 
 import api.dto.OrganizationDTO;
+import api.dto.ProjectDTO;
 import core.entity.Organization;
+import core.entity.OrganizationRoleMember;
 import core.exception.CustomRequestException;
 import core.mapper.OrganizationMapper;
 import core.repository.OrganizationRepository;
+import core.repository.OrganizationRoleMemberRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -12,8 +15,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -22,6 +23,7 @@ import java.util.UUID;
 public class OrganizationService {
 
     private final OrganizationRepository repository;
+    private final OrganizationRoleMemberRepository memberRepository;
     private final OrganizationMapper mapper;
 
     public Mono<OrganizationDTO> save(Mono<OrganizationDTO> organizationDTOMono) {
@@ -85,7 +87,18 @@ public class OrganizationService {
     }
 
     public Flux<OrganizationDTO> findAllByUserId(String userId) {
-        return repository.findAllByOwnerUserId(userId).map(mapper::toDTO);
-    }
+        log.debug(String.format(" @method [ Flux<OrganizationDTO> findAllByUserId(String userId) ] -> @param: %s", userId));
+        return memberRepository
+                .findAllByMemberId(userId)
+                .flatMap(orm -> {
+                    log.debug(String.format(" @method [ Flux<OrganizationDTO> findAllByUserId(String userId) ] -> @call flatMap for each element after @call memberRepository.findAllByMemberId(userId);  element: [ %s ]", orm));
+                    return repository.findById(orm.getOrganizationId()).map( organization -> {
+                        log.debug(String.format("  @method [ Flux<OrganizationDTO> findAllByUserId(String userId) ] -> @body after @call repository.findById(orm.getOrganizationId()) for each element %s", organization ));
+                        OrganizationDTO organizationDTO = mapper.toDTO(organization);
+                        log.debug(String.format("  @method [ Flux<OrganizationDTO> findAllByUserId(String userId) ] -> @body after @call mapper.toDTO(organization) for each element %s", organizationDTO ));
+                        return organizationDTO;
+                    });
+                });
 
+    }
 }

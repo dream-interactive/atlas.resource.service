@@ -26,7 +26,6 @@ public class Organization {
     // owner user
     @Column("owner_user_id")
     private String ownerUserId;
-
     private String img;
 
     // The last modify of the row in table
