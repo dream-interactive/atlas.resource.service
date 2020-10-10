@@ -2,9 +2,11 @@ package core.service;
 
 import api.dto.ProjectDTO;
 import core.entity.Project;
+import core.entity.ProjectRoleMember;
 import core.exception.CustomRequestException;
 import core.mapper.ProjectMapper;
 import core.repository.ProjectRepository;
+import core.repository.ProjectRoleMemberRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -22,6 +24,7 @@ import java.util.UUID;
 public class ProjectService {
 
     private final ProjectRepository repository;
+    private final ProjectRoleMemberRepository projectRoleMemberRepository;
     private final ProjectMapper mapper;
 
     // @formatter:off
@@ -67,9 +70,20 @@ public class ProjectService {
                 "@call repository.existsByOrganizationIdAndName(organizationId, projectName)");
         return repository.existsByOrganizationIdAndName(organizationId, projectName);
     }
-    public Flux<ProjectDTO> findByUserId(String id) {
 
-        return null;
+    public Flux<ProjectDTO> findByUserId(String userId) {
+        log.debug(String.format(" @method [ Flux<ProjectDTO> findByUserId(String userId) ] -> @param: %s", userId));
+        return projectRoleMemberRepository
+                .findAllByMemberId(userId)
+                .flatMap(prm -> {
+                    log.debug(String.format(" @method [ Flux<ProjectDTO> findByUserId(String userId) ] -> @call flatMap for each element after @call projectRoleMemberRepository.findAllByMemberId(userId);  element: [ %s ]", prm));
+                    return repository.findById(prm.getProjectId()).map( project -> {
+                        log.debug(String.format("  @method [ Flux<ProjectDTO> findByUserId(String userId) ] -> @body after @call repository.findById(prm.getProjectId()) for each element %s", project ));
+                        ProjectDTO projectDTO = mapper.toDTO(project);
+                        log.debug(String.format("  @method [ Flux<ProjectDTO> findByUserId(String userId) ] -> @body after @call mapper.toDTO(found) for each element %s", projectDTO ));
+                        return projectDTO;
+                    });
+                });
     }
 
 }

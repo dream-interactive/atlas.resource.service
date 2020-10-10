@@ -1,11 +1,14 @@
-package core.router;
+package core.controller;
 
 import api.dto.ProjectDTO;
 import core.controller.ProjectController;
+import core.entity.Project;
+import core.entity.ProjectRoleMember;
 import core.exception.CustomExceptionHandler;
 import core.mapper.ProjectMapper;
 import core.mapper.ProjectMapperImpl;
 import core.repository.ProjectRepository;
+import core.repository.ProjectRoleMemberRepository;
 import core.service.ProjectService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -17,9 +20,15 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.csrf;
 
@@ -28,7 +37,8 @@ import static org.springframework.security.test.web.reactive.server.SecurityMock
 class ProjectControllerTest {
     @MockBean
     private ProjectRepository repository;
-
+    @MockBean
+    private ProjectRoleMemberRepository projectRoleMemberRepository;
     @Autowired
     private ProjectMapper mapper;
 
@@ -44,7 +54,7 @@ class ProjectControllerTest {
                 "ProjectName",
                 "PRJC",
                 UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),
-                1,
+                "SCRUM",
                 "github|wffio3r2fjcc2v90bxi5",
                 null,
                 false);
@@ -53,7 +63,7 @@ class ProjectControllerTest {
                 "ProjectName",
                 "PRJC",
                 UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),
-                1,
+                "SCRUM",
                 "github|wffio3r2fjcc2v90bxi5",
                 null,
                 false);
@@ -80,7 +90,7 @@ class ProjectControllerTest {
                     Assertions.assertEquals( returnDTO.getName(), result.getResponseBody().getName());
                     Assertions.assertEquals( returnDTO.getKey(), result.getResponseBody().getKey());
                     Assertions.assertEquals( returnDTO.getLeadId(), result.getResponseBody().getLeadId());
-                    Assertions.assertEquals( returnDTO.getTypeId(), result.getResponseBody().getTypeId());
+                    Assertions.assertEquals( returnDTO.getType(), result.getResponseBody().getType());
                 });
     }
 
@@ -93,7 +103,7 @@ class ProjectControllerTest {
                 "ProjectName",
                 "PRJC",
                 UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),
-                1,
+                "SCRUM",
                 "github|wffio3r2fjcc2v90bxi5",
                 null,
                 false);
@@ -103,7 +113,7 @@ class ProjectControllerTest {
                 "ProjectName",
                 "PRJC",
                 UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),
-                1,
+                "SCRUM",
                 "github|wffio3r2fjcc2v90bxi5",
                 null,
                 false);
@@ -136,7 +146,7 @@ class ProjectControllerTest {
                 "ProjectName2",
                 "PRJC",
                 UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),
-                1,
+                "SCRUM",
                 "github|wffio3r2fjcc2v90bxi5",
                 null,
                 false);
@@ -145,7 +155,7 @@ class ProjectControllerTest {
                 "ProjectName2",
                 "PRJC",
                 UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),
-                1,
+                "SCRUM",
                 "github|wffio3r2fjcc2v90bxi5",
                 null,
                 false);
@@ -172,7 +182,7 @@ class ProjectControllerTest {
                     Assertions.assertEquals( returnDTO.getName(), result.getResponseBody().getName());
                     Assertions.assertEquals( returnDTO.getKey(), result.getResponseBody().getKey());
                     Assertions.assertEquals( returnDTO.getLeadId(), result.getResponseBody().getLeadId());
-                    Assertions.assertEquals( returnDTO.getTypeId(), result.getResponseBody().getTypeId());
+                    Assertions.assertEquals( returnDTO.getType(), result.getResponseBody().getType());
                 });
     }
     @Test
@@ -190,6 +200,65 @@ class ProjectControllerTest {
                 .expectStatus().isOk()
                 .expectBody(Boolean.class)
                 .consumeWith(result -> Assertions.assertTrue(result.getResponseBody()));
+    }
+
+    @Test
+    @WithMockUser
+    void testFindByUserId() {
+
+        ProjectRoleMember projectRoleMember =
+                new ProjectRoleMember(
+                        UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
+                        2,
+                        "github|wffio3r2fjcc2v90bxi5");
+        ProjectRoleMember projectRoleMember1 =
+                new ProjectRoleMember(
+                        UUID.fromString("d43405ef-ba1c-4c4b-8cfd-11f54b23972e"),
+                        2,
+                        "github|wffio3r2fjcc2v90bxi5");
+
+
+        Project returnProject1 = new Project(
+                UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
+                "ProjectName",
+                "PRJC",
+                UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),
+                1,
+                "github|wffio3r2fjcc2v90bxi5",
+                null,
+                false,
+                null);
+
+        Project returnProject2 = new Project(
+                UUID.fromString("d43405ef-ba1c-4c4b-8cfd-11f54b23972e"),
+                "ProjectName2",
+                "PRJC2",
+                UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),
+                1,
+                "github|wffio3r2fjcc2v90bxi5",
+                null,
+                false,
+                null);
+
+        List<ProjectDTO> results = List.of(returnProject1, returnProject2).stream().map(mapper::toDTO).collect(Collectors.toList());
+
+        Mockito.when(projectRoleMemberRepository.findAllByMemberId("github|wffio3r2fjcc2v90bxi5"))
+                .thenReturn(Flux.just(projectRoleMember, projectRoleMember1));
+
+        Mockito.when(repository.findById(  UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
+                .thenReturn(Mono.just(returnProject1));
+        Mockito.when(repository.findById(  UUID.fromString("d43405ef-ba1c-4c4b-8cfd-11f54b23972e")))
+                .thenReturn(Mono.just(returnProject2));
+
+        webTestClient
+                .mutateWith(csrf())
+                .get()
+                .uri("/api/projects?userId=github|wffio3r2fjcc2v90bxi5")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProjectDTO.class)
+                .isEqualTo(results);
+
     }
 
 
