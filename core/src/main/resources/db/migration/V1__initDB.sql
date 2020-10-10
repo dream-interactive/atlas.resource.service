@@ -5,7 +5,8 @@ create table if not exists organization
     name  varchar(100) unique not null,
     valid_name varchar(100) unique not null,
     owner_user_id varchar not null,
-    last_modify timestamp with time zone default current_timestamp
+    last_modify timestamp with time zone default current_timestamp,
+    img text not null default '../../../assets/images/icon-business-pack/svg/101-laptop.svg'::text
 );
 
 create table if not exists org_role
@@ -19,10 +20,10 @@ insert into org_role (role) values ('OWNER');
 insert into org_role (role) values ('MANAGER');
 insert into org_role (role) values ('MEMBER');
 
-create table if not exists org_user_role
+create table if not exists org_role_member
 (
     organization_id uuid,
-    atlas_user_id varchar,
+    member_id varchar,
     org_role_id int,
 
     constraint fk_org_user_role_organization_id
