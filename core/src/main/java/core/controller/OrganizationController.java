@@ -20,12 +20,12 @@ public class OrganizationController implements OrganizationEndpoints {
 
     @Override
     public Mono<OrganizationDTO> create(@RequestBody Mono<OrganizationDTO> organizationDTOMono) {
-        return service.save(organizationDTOMono);
+        return service.create(organizationDTOMono);
     }
 
     @Override
     public Mono<OrganizationDTO> update(@RequestBody Mono<OrganizationDTO> organizationDTOMono) {
-        return service.save(organizationDTOMono);
+        return service.update(organizationDTOMono);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class OrganizationController implements OrganizationEndpoints {
     }
 
     @Override
-    public Flux<OrganizationDTO> findAllByUserId(String userId) {
-        return service.findAllByUserId(userId);
+    public Flux<OrganizationDTO> findByUserId(String userId) {
+        return service.findByUserId(userId);
     }
 }
