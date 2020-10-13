@@ -170,6 +170,7 @@ class OrganizationControllerTest {
                     Assertions.assertEquals(returnDTO.getName(), result.getResponseBody().getName());
                     Assertions.assertEquals(returnDTO.getValidName(), result.getResponseBody().getValidName());
                     Assertions.assertEquals(returnDTO.getOwnerUserId(), result.getResponseBody().getOwnerUserId());
+                    Assertions.assertEquals(returnDTO.getImg(), result.getResponseBody().getImg());
                 });
 
 
@@ -202,6 +203,7 @@ class OrganizationControllerTest {
                     Assertions.assertEquals(organizationDTO.getName(), result.getResponseBody().getName());
                     Assertions.assertEquals(organizationDTO.getValidName(), result.getResponseBody().getValidName());
                     Assertions.assertEquals(organizationDTO.getOwnerUserId(), result.getResponseBody().getOwnerUserId());
+                    Assertions.assertEquals(organizationDTO.getImg(), result.getResponseBody().getImg());
                 });
 
     }
