@@ -3,6 +3,7 @@ package core.controller;
 import api.dto.ProjectDTO;
 import api.endpoint.ProjectEndpoints;
 import core.service.ProjectService;
+import core.service.impl.ProjectServiceImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,11 +19,11 @@ public class ProjectController implements ProjectEndpoints {
     private final ProjectService service;
 
     public Mono<ProjectDTO> create(@RequestBody Mono<ProjectDTO> projectDTOMono) {
-        return service.save(projectDTOMono);
+        return service.create(projectDTOMono);
     }
 
     public Mono<ProjectDTO> update(@RequestBody Mono<ProjectDTO> projectDTOMono) {
-        return service.save(projectDTOMono);
+        return service.update(projectDTOMono);
     }
 
     @Override
