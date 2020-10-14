@@ -1,7 +1,6 @@
 package core.controller;
 
 import api.dto.ProjectDTO;
-import core.controller.ProjectController;
 import core.entity.Project;
 import core.entity.ProjectRoleMember;
 import core.exception.CustomExceptionHandler;
@@ -9,7 +8,7 @@ import core.mapper.ProjectMapper;
 import core.mapper.ProjectMapperImpl;
 import core.repository.ProjectRepository;
 import core.repository.ProjectRoleMemberRepository;
-import core.service.ProjectService;
+import core.service.impl.ProjectServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -17,28 +16,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.csrf;
 
-@Import({ProjectService.class, ProjectMapperImpl.class})
+@Import({ProjectServiceImpl.class, ProjectMapperImpl.class})
 @WebFluxTest(ProjectController.class)
 class ProjectControllerTest {
     @MockBean
     private ProjectRepository repository;
     @MockBean
     private ProjectRoleMemberRepository projectRoleMemberRepository;
+    @MockBean
+    private DatabaseClient databaseClient;
+
     @Autowired
     private ProjectMapper mapper;
 
@@ -68,10 +68,14 @@ class ProjectControllerTest {
                 null,
                 false);
 
+        ProjectRoleMember projectRoleMember = new ProjectRoleMember(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"), 2, "github|wffio3r2fjcc2v90bxi5");
+
         Mockito.when(repository.save(mapper.toEntity(projectDTO)))
                 .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
         Mockito.when(repository.findByOrganizationIdAndKey(UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),"PRJC"))
                 .thenReturn(Mono.empty());
+        Mockito.when(projectRoleMemberRepository.save(projectRoleMember))
+                .thenReturn(Mono.just(projectRoleMember));
         Mockito.when(repository.findById(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
                 .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
 
