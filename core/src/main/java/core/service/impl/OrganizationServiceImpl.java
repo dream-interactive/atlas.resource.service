@@ -2,9 +2,11 @@ package core.service.impl;
 
 import api.dto.OrganizationDTO;
 import core.entity.Organization;
+import core.entity.OrganizationRoleMember;
 import core.exception.CustomRequestException;
 import core.mapper.OrganizationMapper;
 import core.repository.OrganizationRepository;
+import core.repository.OrganizationRoleMemberDAO;
 import core.repository.OrganizationRoleMemberRepository;
 import core.service.OrganizationService;
 import lombok.AllArgsConstructor;
@@ -23,7 +25,7 @@ import java.util.UUID;
 @Slf4j
 public class OrganizationServiceImpl implements OrganizationService {
 
-    private final DatabaseClient db;
+    private final OrganizationRoleMemberDAO dao;
 
     private final OrganizationRepository repository;
     private final OrganizationRoleMemberRepository memberRepository;
@@ -120,8 +122,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                                 })
                                 .switchIfEmpty(
                                         Mono.error(new CustomRequestException(
-                                                String.format("ERROR ATLAS-7: Invalid organization id = %s", organization.getId()),
-                                                HttpStatus.CONFLICT)
+                                                String.format("ERROR ATLAS-3: Could not find organization with id - %s", organization.getId()),
+                                                HttpStatus.BAD_REQUEST)
                                         )
                                 );
                     }
@@ -152,9 +154,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                                 return repository.save(organization).flatMap(saved -> {
                                     log.debug(" @method [ Mono<OrganizationDTO> create (Mono<OrganizationDTO> organizationDTOMono) ] ->  @body after @call repository.save(organization): " + saved);
                                     Mono<Organization> findById = repository.findById(saved.getId());
-                                    String sqlQuery = String.format("insert into org_role_member (organization_id, member_id, org_role_id) " +
-                                            "values ('%s', '%2$s', '%3$s') ", saved.getId(), saved.getOwnerUserId(), "1"); // 1 - owner role
-                                    return executeSQL(sqlQuery)
+//                                    String sqlQuery = String.format("insert into org_role_member (organization_id, member_id, org_role_id) " +
+//                                            "values ('%s', '%2$s', '%3$s') ", saved.getId(), saved.getOwnerUserId(), 1); // 1 - owner role
+                                    OrganizationRoleMember organizationRoleMember = new OrganizationRoleMember(saved.getId(), saved.getOwnerUserId(), 1);
+                                    log.debug(" @method [ Mono<OrganizationDTO> create (Mono<OrganizationDTO> organizationDTOMono) ] ->  @body before @call dao.create(organizationRoleMember): " + organizationRoleMember);
+                                    return dao.create(organizationRoleMember)
                                             .then(findById)
                                             .map(found -> {
                                                 log.debug(" @method [ Mono<OrganizationDTO> create (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call repository.findById(organization): " + found);
@@ -167,31 +171,24 @@ public class OrganizationServiceImpl implements OrganizationService {
                 });
     }
 
-    @Transactional
     public Mono<OrganizationDTO> fetch(UUID organizationId) {
         return repository.findById(organizationId)
-                .flatMap(isPresent -> {
-                    log.debug(" @method [ Mono<OrganizationDTO> fetch (UUID organizationId) ] -> @call repository.fetch(organizationId)");
-                    if (isPresent == null) {
-                        return Mono.error(
-                                new CustomRequestException(
-                                        String.format("ERROR ATLAS-3: Could not find organization with id - %s", organizationId),
-                                        HttpStatus.CONFLICT)
-                        );
-                    }
-                    log.debug(" @method [ Mono<OrganizationDTO> fetch (UUID organizationId) ] -> @call repository.findById(organizationId)");
-                    return repository.findById(organizationId).map(mapper::toDTO);
-                });
+                .map(organization -> {
+                    log.debug(String.format(" @method [ Mono<OrganizationDTO> fetch (UUID organizationId) ] -> @body after repository.findById(organizationId): %s", organization));
+                    return mapper.toDTO(organization);
+                })
+                .switchIfEmpty(
+                        Mono.error(new CustomRequestException(
+                                String.format("ERROR ATLAS-3: Could not find organization with id - %s", organizationId),
+                                HttpStatus.CONFLICT)
+                        )
+                );
     }
 
-    @Transactional
     public Mono<Void> delete(UUID organizationId) {
-        String deleteSQL = String.format("delete from org_role_member where organization_id = %s", organizationId);
-        return repository.deleteById(organizationId)
-                .flatMap(deleted -> executeSQL(deleteSQL).cast(Void.class));
+        return repository.deleteById(organizationId);
     }
 
-    @Transactional
     public Flux<OrganizationDTO> findByUserId(String userId) {
         log.debug(String.format(" @method [ Flux<OrganizationDTO> findAllByUserId(String userId) ] -> @param: %s", userId));
         return memberRepository
@@ -213,8 +210,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     /* private methods */
 
-    private Mono<Integer> executeSQL(String sql) {
-        return db.execute(sql).fetch().rowsUpdated();
-    }
+//    private Mono<Void> executeSQL(String sql) {
+//        return db.execute(sql).then();
+//    }
 
 }

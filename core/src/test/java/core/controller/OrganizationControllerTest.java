@@ -7,16 +7,29 @@ import core.exception.CustomExceptionHandler;
 import core.mapper.OrganizationMapper;
 import core.mapper.OrganizationMapperImpl;
 import core.repository.OrganizationRepository;
+import core.repository.OrganizationRoleMemberDAO;
 import core.repository.OrganizationRoleMemberRepository;
-import core.service.OrganizationService;
+import core.service.impl.OrganizationServiceImpl;
+import io.r2dbc.spi.Connection;
+import io.r2dbc.spi.ConnectionFactory;
+import io.r2dbc.spi.Statement;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.r2dbc.core.DatabaseClient;
+import org.springframework.data.r2dbc.core.DefaultReactiveDataAccessStrategy;
+import org.springframework.data.r2dbc.dialect.PostgresDialect;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -30,7 +43,7 @@ import java.util.stream.Collectors;
 
 import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.csrf;
 
-@Import({OrganizationService.class, OrganizationMapperImpl.class})
+@Import({OrganizationServiceImpl.class, OrganizationMapperImpl.class})
 @WebFluxTest(OrganizationController.class)
 class OrganizationControllerTest {
 
@@ -38,6 +51,12 @@ class OrganizationControllerTest {
     private OrganizationRepository repository;
     @MockBean
     private OrganizationRoleMemberRepository memberRepository;
+    @MockBean
+    private OrganizationRoleMemberDAO dao;
+
+//    @Mock
+//    Connection connection;
+//    private DatabaseClient.Builder databaseClientBuilder;
 
     @Autowired
     private OrganizationMapper mapper;
@@ -45,7 +64,17 @@ class OrganizationControllerTest {
     @Autowired
     private WebTestClient webTestClient;
 
-    // TODO update, create tests
+//    @BeforeEach
+//    void before() {
+//        ConnectionFactory connectionFactory = Mockito.mock(ConnectionFactory.class);
+//
+//        Mockito.when(connectionFactory.create()).thenReturn((Publisher) Mono.just(connection));
+//        Mockito.when(connection.close()).thenReturn(Mono.empty());
+//
+//        databaseClientBuilder = DatabaseClient.builder()
+//                .connectionFactory(connectionFactory)
+//                .dataAccessStrategy(new DefaultReactiveDataAccessStrategy(PostgresDialect.INSTANCE));
+//    }
 
     @Test
     @WithMockUser
@@ -99,12 +128,8 @@ class OrganizationControllerTest {
                 "img"
         );
 
-        Mockito.when(repository.save(mapper.toEntity(organizationDTO)))
-                .thenReturn(Mono.just(organizationDTO).map(mapper::toEntity));
-        Mockito.when(repository.save(mapper.toEntity(organizationDTO)))
-                .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
         Mockito.when(repository.findById(organizationDTO.getId()))
-                .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
+                .thenReturn(Mono.empty());
 
         webTestClient
                 .mutateWith(csrf())
@@ -161,10 +186,9 @@ class OrganizationControllerTest {
                 });
     }
 
-    /*
     @Test
     @WithMockUser
-    void testSaveCreateOrganization() {
+    void testCreateOrganization() {
 
         OrganizationDTO organizationDTO = new OrganizationDTO(
                 null,
@@ -182,12 +206,21 @@ class OrganizationControllerTest {
                 "img"
         );
 
-        Mockito.when(repository.save(mapper.toEntity(organizationDTO)))
-                .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
+        OrganizationRoleMember organizationRoleMember = new OrganizationRoleMember(
+                organizationDTO.getId(), organizationDTO.getOwnerUserId(), 1
+        );
+
         Mockito.when(repository.findByValidName("organization-name"))
                 .thenReturn(Mono.empty());
+        Mockito.when(repository.save(mapper.toEntity(organizationDTO)))
+                .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
+        Mockito.when(dao.create(organizationRoleMember))
+                .thenReturn(Mono.just(1));
         Mockito.when(repository.findById(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
                 .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
+
+        // TODO fix this
+
 
         webTestClient
                 .mutateWith(csrf())
@@ -207,48 +240,6 @@ class OrganizationControllerTest {
                 });
 
     }
-
-    @Test
-    @WithMockUser
-    void testSaveCreateErrorOrganization() {
-
-        OrganizationDTO organizationDTO = new OrganizationDTO(
-                null,
-                "Organization Name",
-                "Organization-Name",
-                "d43405ef-eb60-47c9-88ed-f4a732a1eab8",
-                "img"
-        );
-
-        OrganizationDTO returnDTO = new OrganizationDTO(
-                UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
-                "Organization Name",
-                "Organization-Name",
-                "d43405ef-eb60-47c9-88ed-f4a732a1eab8",
-                "img"
-        );
-
-        Mockito.when(repository.findByValidName("Organization-Name"))
-                .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
-        Mockito.when(repository.save(mapper.toEntity(organizationDTO)))
-                .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
-        Mockito.when(repository.findById(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
-                .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
-
-        webTestClient
-                .mutateWith(csrf())
-                .post()
-                .uri("/api/organizations")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Mono.just(organizationDTO), OrganizationDTO.class)
-                .exchange()
-                .expectStatus().is4xxClientError()
-                .expectBody(CustomExceptionHandler.class);
-
-
-    }
-
-     */
 
     @Test
     @WithMockUser
@@ -323,7 +314,6 @@ class OrganizationControllerTest {
                 .expectStatus().isOk()
                 .expectBody(Boolean.class)
                 .consumeWith(result -> Assertions.assertTrue(Objects.requireNonNull(result.getResponseBody())));
-
     }
 
     @Test
@@ -333,12 +323,12 @@ class OrganizationControllerTest {
         OrganizationRoleMember organizationRoleMember_1 = new OrganizationRoleMember(
                 UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
                 "github|13",
-                "1"
+                1
         );
         OrganizationRoleMember organizationRoleMember_2 = new OrganizationRoleMember(
                 UUID.fromString("d43405ef-ba1c-4c4b-8cfd-11f54b23113b"),
                 "github|13",
-                "2"
+                2
         );
 
         Organization returnOrganization_1 = new Organization(
@@ -379,7 +369,6 @@ class OrganizationControllerTest {
                 .expectStatus().isOk()
                 .expectBodyList(OrganizationDTO.class)
                 .isEqualTo(results);
-
     }
 
 }
