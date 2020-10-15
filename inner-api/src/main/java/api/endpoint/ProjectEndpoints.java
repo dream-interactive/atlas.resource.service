@@ -39,8 +39,4 @@ public interface ProjectEndpoints {
     @DeleteMapping(value = "/{id}")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     Mono<Void> delete(@PathVariable(value = "id") UUID id);
-
-    @GetMapping(params = {"organizationId", "projectName"})
-    @ResponseStatus(code = HttpStatus.OK)
-    Mono<Boolean>existsByOrganizationIdAndName(@RequestParam("organizationId") UUID organizationId, @RequestParam("projectName") String projectName);
 }
