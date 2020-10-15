@@ -2,7 +2,6 @@ package core.controller;
 
 import api.dto.OrganizationDTO;
 import api.endpoint.OrganizationEndpoints;
-import core.entity.Organization;
 import core.service.OrganizationService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,12 +19,12 @@ public class OrganizationController implements OrganizationEndpoints {
 
     @Override
     public Mono<OrganizationDTO> create(@RequestBody Mono<OrganizationDTO> organizationDTOMono) {
-        return service.save(organizationDTOMono);
+        return service.create(organizationDTOMono);
     }
 
     @Override
     public Mono<OrganizationDTO> update(@RequestBody Mono<OrganizationDTO> organizationDTOMono) {
-        return service.save(organizationDTOMono);
+        return service.update(organizationDTOMono);
     }
 
     @Override
@@ -44,7 +43,7 @@ public class OrganizationController implements OrganizationEndpoints {
     }
 
     @Override
-    public Flux<OrganizationDTO> findAllByUserId(String userId) {
-        return service.findAllByUserId(userId);
+    public Flux<OrganizationDTO> findByUserId(String userId) {
+        return service.findByUserId(userId);
     }
 }

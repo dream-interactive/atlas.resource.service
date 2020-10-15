@@ -44,6 +44,6 @@ public interface OrganizationEndpoints {
 
     @GetMapping(params = "userId")
     @ResponseStatus(code = HttpStatus.OK)
-    Flux<OrganizationDTO> findAllByUserId(@RequestParam(value = "userId") String userId);
+    Flux<OrganizationDTO> findByUserId(@RequestParam(value = "userId") String userId);
 
 }

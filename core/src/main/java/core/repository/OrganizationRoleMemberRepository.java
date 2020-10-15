@@ -8,6 +8,6 @@ import reactor.core.publisher.Flux;
 import java.util.UUID;
 
 @Repository
-public interface OrganizationRoleMemberRepository extends ReactiveCrudRepository<OrganizationRoleMember, String> {
+public interface OrganizationRoleMemberRepository extends ReactiveCrudRepository<OrganizationRoleMember, UUID> {
     Flux<OrganizationRoleMember> findAllByMemberId(String userId);
 }

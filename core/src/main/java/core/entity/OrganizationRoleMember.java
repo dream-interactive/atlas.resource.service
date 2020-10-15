@@ -18,5 +18,5 @@ public class OrganizationRoleMember {
     @Column("member_id")
     private String memberId;
     @Column("org_role_id")
-    private String userRole;
+    private Integer userRole;
 }
