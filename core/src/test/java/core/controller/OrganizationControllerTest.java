@@ -10,26 +10,13 @@ import core.repository.OrganizationRepository;
 import core.repository.OrganizationRoleMemberDAO;
 import core.repository.OrganizationRoleMemberRepository;
 import core.service.impl.OrganizationServiceImpl;
-import io.r2dbc.spi.Connection;
-import io.r2dbc.spi.ConnectionFactory;
-import io.r2dbc.spi.Statement;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
-import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.r2dbc.core.DatabaseClient;
-import org.springframework.data.r2dbc.core.DefaultReactiveDataAccessStrategy;
-import org.springframework.data.r2dbc.dialect.PostgresDialect;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -54,13 +41,8 @@ class OrganizationControllerTest {
     @MockBean
     private OrganizationRoleMemberDAO dao;
 
-//    @Mock
-//    Connection connection;
-//    private DatabaseClient.Builder databaseClientBuilder;
-
     @Autowired
     private OrganizationMapper mapper;
-
     @Autowired
     private WebTestClient webTestClient;
 
@@ -207,9 +189,8 @@ class OrganizationControllerTest {
         );
 
         OrganizationRoleMember organizationRoleMember = new OrganizationRoleMember(
-                organizationDTO.getId(), organizationDTO.getOwnerUserId(), 1
+                UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"), organizationDTO.getOwnerUserId(), 1
         );
-
         Mockito.when(repository.findByValidName("organization-name"))
                 .thenReturn(Mono.empty());
         Mockito.when(repository.save(mapper.toEntity(organizationDTO)))
@@ -219,7 +200,7 @@ class OrganizationControllerTest {
         Mockito.when(repository.findById(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
                 .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
 
-        // TODO fix this
+
 
 
         webTestClient
