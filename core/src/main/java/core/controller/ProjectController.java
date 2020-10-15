@@ -42,9 +42,5 @@ public class ProjectController implements ProjectEndpoints {
         return null;
     }
 
-    @Override
-    public Mono<Boolean> existsByOrganizationIdAndName(UUID organizationId, String projectName) {
-        return service.existsByOrganizationIdAndName(organizationId, projectName);
-    }
 
 }

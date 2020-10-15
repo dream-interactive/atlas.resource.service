@@ -7,6 +7,7 @@ import core.exception.CustomExceptionHandler;
 import core.mapper.ProjectMapper;
 import core.mapper.ProjectMapperImpl;
 import core.repository.ProjectRepository;
+import core.repository.ProjectRoleMemberDAO;
 import core.repository.ProjectRoleMemberRepository;
 import core.service.impl.ProjectServiceImpl;
 import org.junit.jupiter.api.Assertions;
@@ -27,7 +28,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.csrf;
+
 
 @Import({ProjectServiceImpl.class, ProjectMapperImpl.class})
 @WebFluxTest(ProjectController.class)
@@ -36,8 +39,9 @@ class ProjectControllerTest {
     private ProjectRepository repository;
     @MockBean
     private ProjectRoleMemberRepository projectRoleMemberRepository;
+
     @MockBean
-    private DatabaseClient databaseClient;
+    private ProjectRoleMemberDAO dao;
 
     @Autowired
     private ProjectMapper mapper;
@@ -47,7 +51,7 @@ class ProjectControllerTest {
 
     @Test
     @WithMockUser
-    void testSaveCreateProject() {
+    void testCreateProject() {
 
         ProjectDTO projectDTO = new ProjectDTO(
                 null,
@@ -70,13 +74,13 @@ class ProjectControllerTest {
 
         ProjectRoleMember projectRoleMember = new ProjectRoleMember(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"), 2, "github|wffio3r2fjcc2v90bxi5");
 
-        Mockito.when(repository.save(mapper.toEntity(projectDTO)))
+        when(repository.save(mapper.toEntity(projectDTO)))
                 .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
-        Mockito.when(repository.findByOrganizationIdAndKey(UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),"PRJC"))
+        when(repository.findByOrganizationIdAndKey(UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),"PRJC"))
                 .thenReturn(Mono.empty());
-        Mockito.when(projectRoleMemberRepository.save(projectRoleMember))
-                .thenReturn(Mono.just(projectRoleMember));
-        Mockito.when(repository.findById(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
+        when(dao.create(projectRoleMember))
+                .thenReturn(Mono.just(1));
+        when(repository.findById(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
                 .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
 
 
@@ -100,7 +104,7 @@ class ProjectControllerTest {
 
     @Test
     @WithMockUser
-    void testSaveCreateErrorProject() {
+    void testCreateProject_ErrorIfKeyPresent() {
 
         ProjectDTO projectDTO = new ProjectDTO(
                 null,
@@ -122,13 +126,8 @@ class ProjectControllerTest {
                 null,
                 false);
 
-        Mockito.when(repository.findByOrganizationIdAndKey(UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),"PRJC"))
+        when(repository.findByOrganizationIdAndKey(UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),"PRJC"))
                 .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
-
-        Mockito.when(repository.save(mapper.toEntity(projectDTO)))
-                .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
-
-
 
         webTestClient
                 .mutateWith(csrf())
@@ -143,20 +142,11 @@ class ProjectControllerTest {
 
     @Test
     @WithMockUser
-    void testSaveUpdateProject() {
+    void testUpdateProject_ErrorIfInvalidProjectId() {
 
         ProjectDTO projectDTO = new ProjectDTO(
                 UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
-                "ProjectName2",
-                "PRJC",
-                UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),
-                "SCRUM",
-                "github|wffio3r2fjcc2v90bxi5",
-                null,
-                false);
-        ProjectDTO returnDTO = new ProjectDTO(
-                UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
-                "ProjectName2",
+                "ProjectName",
                 "PRJC",
                 UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),
                 "SCRUM",
@@ -164,13 +154,8 @@ class ProjectControllerTest {
                 null,
                 false);
 
-        Mockito.when(repository.save(mapper.toEntity(projectDTO)))
-                .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
-
-        Mockito.when(repository.findByOrganizationIdAndKey(UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),"PRJC"))
-                .thenReturn(Mono.just(projectDTO).map(mapper::toEntity));
-        Mockito.when(repository.findById(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
-                .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
+        when(repository.findById(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
+                .thenReturn(Mono.empty());
 
         webTestClient
                 .mutateWith(csrf())
@@ -179,31 +164,123 @@ class ProjectControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(projectDTO), ProjectDTO.class)
                 .exchange()
-                .expectStatus().isOk()
-                .expectBody(ProjectDTO.class)
-                .consumeWith(result -> {
-                    Assertions.assertEquals( returnDTO.getId(), result.getResponseBody().getId());
-                    Assertions.assertEquals( returnDTO.getName(), result.getResponseBody().getName());
-                    Assertions.assertEquals( returnDTO.getKey(), result.getResponseBody().getKey());
-                    Assertions.assertEquals( returnDTO.getLeadId(), result.getResponseBody().getLeadId());
-                    Assertions.assertEquals( returnDTO.getType(), result.getResponseBody().getType());
-                });
+                .expectStatus().is4xxClientError()
+                .expectBody(CustomExceptionHandler.class);
     }
+
     @Test
     @WithMockUser
-    void testExistsByOrganizationIdAndName() {
+    void testUpdateProject_updateIfLeadChanged() {
 
-        Mockito.when(repository.existsByOrganizationIdAndName(UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"), "ProjectName2"))
-                .thenReturn(Mono.just(true));
+        ProjectDTO newDTO = new ProjectDTO(
+                UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
+                "ProjectName2",
+                "PRJC",
+                UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),
+                "SCRUM",
+                "github|4",
+                null,
+                false);
+
+        Project returned = new Project (
+                UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
+                "ProjectName2",
+                "PRJC",
+                UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),
+                1,
+                "github|4",
+                null,
+                false,
+                null);
+
+
+        ProjectDTO existDTO = new ProjectDTO(
+                UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
+                "ProjectName2",
+                "PRJC",
+                UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),
+                "SCRUM",
+                "github|5",
+                null,
+                false);
+
+        ProjectRoleMember projectRoleMember = new ProjectRoleMember(newDTO.getId(), 2, newDTO.getLeadId());// 2 -> hard code id in table role_in_project
+
+
+        when(repository.findById(newDTO.getId())).thenReturn(Mono.just(existDTO).map(mapper::toEntity));
+        when(repository.findById(newDTO.getId())).thenReturn(Mono.just(returned));
+
+        when(repository.save(mapper.toEntity(newDTO)))
+                .thenReturn(Mono.just(existDTO).map(mapper::toEntity));
+
+        when(dao.reassignLead(projectRoleMember))
+                .thenReturn(Mono.just(1));
 
         webTestClient
                 .mutateWith(csrf())
-                .get()
-                .uri("/api/projects?organizationId=d43405ef-eb60-47c9-88ed-f4a732a1eab8&projectName=ProjectName2")
+                .put()
+                .uri("/api/projects")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(newDTO), ProjectDTO.class)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(Boolean.class)
-                .consumeWith(result -> Assertions.assertTrue(result.getResponseBody()));
+                .expectBody(ProjectDTO.class)
+                .isEqualTo(newDTO);
+    }
+
+    @Test
+    @WithMockUser
+    void testUpdateProject_updateIfLeadDoesntChanged() {
+
+        ProjectDTO newDTO = new ProjectDTO(
+                UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
+                "ProjectName2",
+                "PRJC",
+                UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),
+                "SCRUM",
+                "github|4",
+                null,
+                false);
+
+        Project returned = new Project (
+                UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
+                "ProjectName2",
+                "PRJC",
+                UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),
+                1,
+                "github|4",
+                null,
+                false,
+                null);
+
+
+        ProjectDTO existDTO = new ProjectDTO(
+                UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
+                "ProjectName",
+                "PRJC",
+                UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),
+                "SCRUM",
+                "github|4",
+                null,
+                false);
+
+        when(repository.findById(newDTO.getId())).thenReturn(Mono.just(existDTO).map(mapper::toEntity));
+        when(repository.findById(newDTO.getId())).thenReturn(Mono.just(returned));
+
+        when(repository.save(mapper.toEntity(newDTO)))
+                .thenReturn(Mono.just(existDTO).map(mapper::toEntity));
+
+
+        webTestClient
+                .mutateWith(csrf())
+                .put()
+                .uri("/api/projects")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(newDTO), ProjectDTO.class)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProjectDTO.class)
+                .isEqualTo(newDTO);
     }
 
     @Test
@@ -246,12 +323,12 @@ class ProjectControllerTest {
 
         List<ProjectDTO> results = List.of(returnProject1, returnProject2).stream().map(mapper::toDTO).collect(Collectors.toList());
 
-        Mockito.when(projectRoleMemberRepository.findAllByMemberId("github|wffio3r2fjcc2v90bxi5"))
+        when(projectRoleMemberRepository.findAllByMemberId("github|wffio3r2fjcc2v90bxi5"))
                 .thenReturn(Flux.just(projectRoleMember, projectRoleMember1));
 
-        Mockito.when(repository.findById(  UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
+        when(repository.findById(  UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
                 .thenReturn(Mono.just(returnProject1));
-        Mockito.when(repository.findById(  UUID.fromString("d43405ef-ba1c-4c4b-8cfd-11f54b23972e")))
+        when(repository.findById(  UUID.fromString("d43405ef-ba1c-4c4b-8cfd-11f54b23972e")))
                 .thenReturn(Mono.just(returnProject2));
 
         webTestClient

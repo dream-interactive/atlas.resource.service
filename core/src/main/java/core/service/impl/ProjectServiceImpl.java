@@ -6,6 +6,7 @@ import core.entity.ProjectRoleMember;
 import core.exception.CustomRequestException;
 import core.mapper.ProjectMapper;
 import core.repository.ProjectRepository;
+import core.repository.ProjectRoleMemberDAO;
 import core.repository.ProjectRoleMemberRepository;
 import core.service.ProjectService;
 import lombok.AllArgsConstructor;
@@ -25,49 +26,11 @@ import java.util.UUID;
 @Slf4j
 public class ProjectServiceImpl implements ProjectService {
 
-    private final DatabaseClient db;
+    private final ProjectRoleMemberDAO dao;
 
     private final ProjectRepository repository;
     private final ProjectRoleMemberRepository projectRoleMemberRepository;
     private final ProjectMapper mapper;
-
-
-    @Transactional
-    public Mono<ProjectDTO> update (Mono<ProjectDTO> projectDTOMono){
-        return projectDTOMono
-                .map(projectDTO -> {
-                    log.debug(" @method [ Mono<ProjectDTO> update (Mono<ProjectDTO> projectDTOMono) ] -> @body: " + projectDTO );
-                    return mapper.toEntity(projectDTO);
-                })
-                .flatMap(project -> {
-                    if (project.getId() == null) {
-                        return Mono.error(
-                                new CustomRequestException(
-                                        String.format("ERROR ATLAS-6: Invalid project id - %s.", project.getId()),
-                                        HttpStatus.BAD_REQUEST)
-                        );
-                    }
-                    else {
-                        return repository
-                                .findById(project.getId())
-                                .flatMap(result -> {
-                                    if (result.getId() == null) {
-                                        return Mono.error(
-                                                new CustomRequestException(
-                                                        String.format("ERROR ATLAS-6: Invalid project id - %s.", result.getId()),
-                                                        HttpStatus.BAD_REQUEST)
-                                        );
-                                    }
-                                    else if (result.getLeadId().equals(project.getLeadId())) { // check if lead changed
-                                        return updateIfLeadDoesntChanged(project);
-                                    }
-                                    else {
-                                        return updateIfLeadChanged(project);
-                                    }
-                                });
-                    }
-                });
-    }
 
     @Transactional
     public Mono<ProjectDTO>create(Mono<ProjectDTO> projectDTOMono) {
@@ -93,9 +56,8 @@ public class ProjectServiceImpl implements ProjectService {
                                         .flatMap(saved -> {
                                             log.debug(" @method [ Mono<ProjectDTO> create (Mono<ProjectDTO> projectDTOMono) ] -> @body after @call repository.save(project): " + saved);
                                             Mono<Project> findById = repository.findById(saved.getId());
-                                            String sql = String.format("insert into project_role_member (project_id, role_id, member_id) " +
-                                                    "values ('%s', %2$d, '%3$s') ", saved.getId(), 2, saved.getLeadId()); // 2 -> hard code id in table role_in_project
-                                            return executeSQL(sql)
+                                            ProjectRoleMember projectRoleMember = new ProjectRoleMember(saved.getId(), 2, saved.getLeadId());// 2 -> hard code id in table role_in_project
+                                            return dao.create(projectRoleMember)
                                                     .then(findById) // switch on Mono<Project> findById
                                                     .map(found -> {
                                                         log.debug(" @method [ Mono<ProjectDTO> create (Mono<ProjectDTO> projectDTOMono) ] -> @body after @call repository.findById(saved.getId()) : " + found);
@@ -107,6 +69,35 @@ public class ProjectServiceImpl implements ProjectService {
                             });
                 });
     }
+
+    @Transactional
+    public Mono<ProjectDTO> update (Mono<ProjectDTO> projectDTOMono){
+        return projectDTOMono
+                .map(projectDTO -> {
+                    log.debug(" @method [ Mono<ProjectDTO> update (Mono<ProjectDTO> projectDTOMono) ] -> @body: " + projectDTO );
+                    return mapper.toEntity(projectDTO);
+                })
+                .flatMap(project -> {
+                    return repository
+                            .findById(project.getId())
+                            .flatMap(result -> {
+                                if (result.getLeadId().equals(project.getLeadId())) { // check if lead changed
+                                    return updateIfLeadDoesntChanged(project);
+                                }
+                                else {
+                                    return updateIfLeadChanged(project);
+                                }
+                            })
+                            .switchIfEmpty(
+                                    Mono.error(
+                                            new CustomRequestException(
+                                                    String.format("ERROR ATLAS-6: Invalid project id - %s.", project.getId()),
+                                                    HttpStatus.BAD_REQUEST)
+                                    )
+                            );
+                });
+    }
+
 
     private Mono<ProjectDTO> updateIfLeadDoesntChanged (Project incomingProject) {
         return repository.save(incomingProject)
@@ -126,21 +117,15 @@ public class ProjectServiceImpl implements ProjectService {
     private Mono<ProjectDTO> updateIfLeadChanged(Project incomingProject) {
         log.debug(" @method [ Mono<ProjectDTO> updateIfLeadChanged (Project incomingProject) ] -> @call repository.save(incomingProject)");
         return repository.save(incomingProject)
-                .flatMap(saved -> {
+                .flatMap(updated -> {
 
-                    log.debug(" @method [ Mono<ProjectDTO> updateIfLeadChanged (Project incomingProject) ] -> @body after @call repository.save(incomingProject): " + saved);
-                    Mono<Project> findById = repository.findById(saved.getId());
+                    log.debug(" @method [ Mono<ProjectDTO> updateIfLeadChanged (Project incomingProject) ] -> @body after @call repository.save(incomingProject): " + updated);
+                    Mono<Project> findById = repository.findById(updated.getId());
 
-                    String unassignOldLeadSQL = String.format("update project_role_member set role_id = 3 " + // 3 -> hard code COLLABORATOR id in table role_in_project
-                            "where project_id = '%s' and role_id = 2", saved.getId()); // 2 -> hard code LEAD id in table role_in_project
+                    ProjectRoleMember projectRoleMember = new ProjectRoleMember(updated.getId(), 2, updated.getLeadId());// 2 -> hard code id in table role_in_project
 
-                    String assignNewLeadSQL = String.format("insert into project_role_member (project_id, role_id, member_id) " +
-                            "values ('%s', %2$d, '%3$s') " +
-                            "on conflict on constraint project_role_member_pkey " +
-                            "do update set role_id = %2$d", saved.getId(), 2, saved.getLeadId()); // 2 -> hard code LEAD id in table role_in_project
 
-                    return executeSQL(unassignOldLeadSQL) // un-assign LEAD role
-                            .then(executeSQL(assignNewLeadSQL))  // assign LEAD role
+                    return dao.reassignLead(projectRoleMember)
                             .then(findById) // call Mono<Project> findById
                             .map(found -> {
                                 log.debug(" @method [ Mono<ProjectDTO> updateIfLeadChanged (Project incomingProject) ] -> @body after @call repository.findById(saved.getId()) : " + found);
@@ -149,17 +134,6 @@ public class ProjectServiceImpl implements ProjectService {
                                 return projectDTO;
                             });
                 });
-    }
-
-    private Mono<Integer> executeSQL(String sql) {
-        return db.execute(sql).fetch().rowsUpdated();
-    }
-
-    public Mono<Boolean> existsByOrganizationIdAndName(UUID organizationId, String projectName) {
-        log.debug(" @method [ Mono<Boolean> existsByOrganizationIdAndName(UUID organizationId, String projectName) ] -> " +
-                "@params [organizationId: " + organizationId +  ", @param projectName: " + projectName + "] -> " +
-                "@call repository.existsByOrganizationIdAndName(organizationId, projectName)");
-        return repository.existsByOrganizationIdAndName(organizationId, projectName);
     }
 
     public Flux<ProjectDTO> findByUserId(String userId) {
