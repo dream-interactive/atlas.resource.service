@@ -46,18 +46,6 @@ class OrganizationControllerTest {
     @Autowired
     private WebTestClient webTestClient;
 
-//    @BeforeEach
-//    void before() {
-//        ConnectionFactory connectionFactory = Mockito.mock(ConnectionFactory.class);
-//
-//        Mockito.when(connectionFactory.create()).thenReturn((Publisher) Mono.just(connection));
-//        Mockito.when(connection.close()).thenReturn(Mono.empty());
-//
-//        databaseClientBuilder = DatabaseClient.builder()
-//                .connectionFactory(connectionFactory)
-//                .dataAccessStrategy(new DefaultReactiveDataAccessStrategy(PostgresDialect.INSTANCE));
-//    }
-
     @Test
     @WithMockUser
     void testUpdateOrganizationIdNull() {
@@ -199,9 +187,6 @@ class OrganizationControllerTest {
                 .thenReturn(Mono.just(1));
         Mockito.when(repository.findById(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
                 .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
-
-
-
 
         webTestClient
                 .mutateWith(csrf())

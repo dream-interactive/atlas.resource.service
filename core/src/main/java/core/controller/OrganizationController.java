@@ -2,7 +2,6 @@ package core.controller;
 
 import api.dto.OrganizationDTO;
 import api.endpoint.OrganizationEndpoints;
-import core.entity.Organization;
 import core.service.OrganizationService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.RequestBody;

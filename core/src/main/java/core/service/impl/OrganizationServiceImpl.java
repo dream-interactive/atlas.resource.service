@@ -11,7 +11,6 @@ import core.repository.OrganizationRoleMemberRepository;
 import core.service.OrganizationService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,43 +30,6 @@ public class OrganizationServiceImpl implements OrganizationService {
     private final OrganizationRoleMemberRepository memberRepository;
     private final OrganizationMapper mapper;
 
-    // save deprecated
-    /*
-    public Mono<OrganizationDTO> save(Mono<OrganizationDTO> organizationDTOMono) {
-        return organizationDTOMono
-                .map(organizationDTO -> {
-                    log.debug(" @method [ Mono<OrganizationDTO> save (Mono<OrganizationDTO> organizationDTOMono) ] -> @body: " + organizationDTO);
-                    return mapper.toEntity(organizationDTO);
-                })
-                .flatMap(organization -> {
-                    log.debug(" @method [ Mono<OrganizationDTO> save (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call mapper.toEntity(organizationDTO): " + organization);
-                    return repository
-                            .findByValidName(organization.getValidName())
-                            .hasElement()
-                            .flatMap(isPresent -> {
-                                if (isPresent && organization.getId() == null) {
-                                    return Mono.error(
-                                            new CustomRequestException(
-                                                    "ERROR ATLAS-2: Organization with this name already exists.",
-                                                    HttpStatus.CONFLICT)
-                                    );
-                                }
-                                log.debug(" @method [ Mono<OrganizationDTO> save (Mono<OrganizationDTO> organizationDTOMono) ] -> @call repository.save(organization)");
-                                return repository.save(organization).flatMap(saved -> {
-                                    log.debug(" @method [ Mono<OrganizationDTO> save (Mono<OrganizationDTO> organizationDTOMono) ] ->  @body after @call repository.save(organization): " + saved);
-                                    Mono<Organization> findById = repository.findById(saved.getId());
-                                    return findById.map(found -> {
-                                        log.debug(" @method [ Mono<OrganizationDTO> save (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call repository.findById(organization): " + found);
-                                        OrganizationDTO organizationDTO = mapper.toDTO(found);
-                                        log.debug(" @method [ Mono<OrganizationDTO> save (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call mapper.toDTO(saved) : " + organizationDTO);
-                                        return organizationDTO;
-                                    });
-                                });
-                            });
-                });
-    }
-    */
-
     @Transactional
     public Mono<OrganizationDTO> update(Mono<OrganizationDTO> organizationDTOMono) {
         return organizationDTOMono
@@ -76,9 +38,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                     return mapper.toEntity(organizationDTO);
                 })
                 .flatMap(organization -> {
-                    log.debug(" @method [ Mono<OrganizationDTO> update (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call mapper.toEntity(organizationDTO): " + organization);
+                    log.debug(String.format(" @method [ Mono<OrganizationDTO> update (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call mapper.toEntity(organizationDTO): %s", organization));
                     if (organization.getId() == null) {
-                        log.debug(" @method [ Mono<OrganizationDTO> update (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call if (organization.getId() == null): " + organization.getId());
+                        log.debug(String.format(" @method [ Mono<OrganizationDTO> update (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call if (organization.getId() == null): %s", organization.getId()));
                         return Mono.error(
                                 new CustomRequestException(
                                         String.format("ERROR ATLAS-7: Invalid organization id = %s", organization.getId()),
@@ -89,7 +51,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                         return repository
                                 .findById(organization.getId())
                                 .flatMap(result -> {
-                                    log.debug(" @method [ Mono<OrganizationDTO> update (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call repository.findById(organization.getId()): " + result);
+                                    log.debug(String.format(" @method [ Mono<OrganizationDTO> update (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call repository.findById(organization.getId()): %s", result));
                                     if (result.getId() == null) {
                                         return Mono.error(
                                                 new CustomRequestException(
@@ -108,13 +70,13 @@ public class OrganizationServiceImpl implements OrganizationService {
                                         return repository
                                                 .save(organization)
                                                 .flatMap(saved -> {
-                                                    log.debug(" @method [ Mono<OrganizationDTO> update (Mono<OrganizationDTO> organizationDTOMono) ] ->  @body after @call repository.save(organization): " + saved);
+                                                    log.debug(String.format(" @method [ Mono<OrganizationDTO> update (Mono<OrganizationDTO> organizationDTOMono) ] ->  @body after @call repository.save(organization): %s", saved));
                                                     Mono<Organization> findById = repository.findById(saved.getId());
                                                     return findById
                                                             .map(found -> {
-                                                                log.debug(" @method [ Mono<OrganizationDTO> update (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call repository.findById(organization): " + found);
+                                                                log.debug(String.format(" @method [ Mono<OrganizationDTO> update (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call repository.findById(organization): %s", found));
                                                                 OrganizationDTO organizationDTO = mapper.toDTO(found);
-                                                                log.debug(" @method [ Mono<OrganizationDTO> update (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call mapper.toDTO(saved) : " + organizationDTO);
+                                                                log.debug(String.format(" @method [ Mono<OrganizationDTO> update (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call mapper.toDTO(saved) : %s",  organizationDTO));
                                                                 return organizationDTO;
                                                             });
                                                 });
@@ -138,7 +100,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     return mapper.toEntity(organizationDTO);
                 })
                 .flatMap(organization -> {
-                    log.debug(" @method [ Mono<OrganizationDTO> create (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call mapper.toEntity(organizationDTO): " + organization);
+                    log.debug(String.format(" @method [ Mono<OrganizationDTO> create (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call mapper.toEntity(organizationDTO): %s", organization));
                     return repository
                             .findByValidName(organization.getValidName())
                             .hasElement()
@@ -150,20 +112,18 @@ public class OrganizationServiceImpl implements OrganizationService {
                                                     HttpStatus.CONFLICT)
                                     );
                                 }
-                                log.debug(" @method [ Mono<OrganizationDTO> create (Mono<OrganizationDTO> organizationDTOMono) ] -> @call repository.save(organization)");
+                                log.debug(String.format(" @method [ Mono<OrganizationDTO> create (Mono<OrganizationDTO> organizationDTOMono) ] -> @call repository.save(organization): %s", isPresent));
                                 return repository.save(organization).flatMap(saved -> {
-                                    log.debug(" @method [ Mono<OrganizationDTO> create (Mono<OrganizationDTO> organizationDTOMono) ] ->  @body after @call repository.save(organization): " + saved);
+                                    log.debug(String.format(" @method [ Mono<OrganizationDTO> create (Mono<OrganizationDTO> organizationDTOMono) ] ->  @body after @call repository.save(organization): %s", saved));
                                     Mono<Organization> findById = repository.findById(saved.getId());
-//                                    String sqlQuery = String.format("insert into org_role_member (organization_id, member_id, org_role_id) " +
-//                                            "values ('%s', '%2$s', '%3$s') ", saved.getId(), saved.getOwnerUserId(), 1); // 1 - owner role
                                     OrganizationRoleMember organizationRoleMember = new OrganizationRoleMember(saved.getId(), saved.getOwnerUserId(), 1);
-                                    log.debug(" @method [ Mono<OrganizationDTO> create (Mono<OrganizationDTO> organizationDTOMono) ] ->  @body before @call dao.create(organizationRoleMember): " + organizationRoleMember);
+                                    log.debug(String.format(" @method [ Mono<OrganizationDTO> create (Mono<OrganizationDTO> organizationDTOMono) ] ->  @body before @call dao.create(organizationRoleMember): %s", organizationRoleMember));
                                     return dao.create(organizationRoleMember)
                                             .then(findById)
                                             .map(found -> {
-                                                log.debug(" @method [ Mono<OrganizationDTO> create (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call repository.findById(organization): " + found);
+                                                log.debug(String.format(" @method [ Mono<OrganizationDTO> create (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call repository.findById(organization): %s", found));
                                                 OrganizationDTO organizationDTO = mapper.toDTO(found);
-                                                log.debug(" @method [ Mono<OrganizationDTO> create (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call mapper.toDTO(saved) : " + organizationDTO);
+                                                log.debug(String.format(" @method [ Mono<OrganizationDTO> create (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call mapper.toDTO(saved) : %s", organizationDTO));
                                                 return organizationDTO;
                                             });
                                 });
@@ -207,11 +167,5 @@ public class OrganizationServiceImpl implements OrganizationService {
     public Mono<Boolean> existByValidName(String validName) {
         return repository.findByValidName(validName).hasElement();
     }
-
-    /* private methods */
-
-//    private Mono<Void> executeSQL(String sql) {
-//        return db.execute(sql).then();
-//    }
 
 }
