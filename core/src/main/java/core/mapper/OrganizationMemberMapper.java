@@ -35,10 +35,14 @@ public interface OrganizationMemberMapper {
     @Named("userRoleToUserRoleId")
     default Integer userRoleToUserRoleId(String userRole) {
         switch (userRole) {
-            case "OWNER": return 1;
-            case "MANAGER": return 2;
-            case "MEMBER": return 3;
-            default: throw new CustomRequestException(String.format("ERROR ATLAS-11: Invalid organization member role - %s", userRole), HttpStatus.NOT_FOUND);
+            case "OWNER":
+                return 1;
+            case "MANAGER":
+                return 2;
+            case "MEMBER":
+                return 3;
+            default:
+                throw new CustomRequestException(String.format("ERROR ATLAS-11: Invalid organization member role - %s", userRole), HttpStatus.NOT_FOUND);
         }
     }
 

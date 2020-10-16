@@ -52,14 +52,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                                 .findById(organization.getId())
                                 .flatMap(result -> {
                                     log.debug(String.format(" @method [ Mono<OrganizationDTO> update (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call repository.findById(organization.getId()): %s", result));
-                                    if (result.getId() == null) {
-                                        return Mono.error(
-                                                new CustomRequestException(
-                                                        String.format("ERROR ATLAS-7: Invalid organization id = %s", result.getId()),
-                                                        HttpStatus.BAD_REQUEST)
-                                        );
-                                    }
-                                    else if (!organization.getOwnerUserId().equals(result.getOwnerUserId())) { // if saving ownerId does not match ownerId in db
+                                    if (!organization.getOwnerUserId().equals(result.getOwnerUserId())) { // if saving ownerId does not match ownerId in db
                                         return Mono.error(
                                                 new CustomRequestException(
                                                         String.format("ERROR ATLAS-8: Owner ids does not match: expected %s, was %2$s", result.getOwnerUserId(), organization.getOwnerUserId()),
@@ -76,7 +69,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                                                             .map(found -> {
                                                                 log.debug(String.format(" @method [ Mono<OrganizationDTO> update (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call repository.findById(organization): %s", found));
                                                                 OrganizationDTO organizationDTO = mapper.toDTO(found);
-                                                                log.debug(String.format(" @method [ Mono<OrganizationDTO> update (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call mapper.toDTO(saved) : %s",  organizationDTO));
+                                                                log.debug(String.format(" @method [ Mono<OrganizationDTO> update (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call mapper.toDTO(saved) : %s", organizationDTO));
                                                                 return organizationDTO;
                                                             });
                                                 });
