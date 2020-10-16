@@ -22,4 +22,13 @@ public class OrganizationMemberDAOImp implements OrganizationMemberDAO {
                 .fetch().rowsUpdated();
     }
 
+    public Mono<Integer> update(OrganizationMember organizationMember) {
+        return db
+                .execute("update org_role_member set org_role_id = :org_role_id where organization_id = :organization_id and member_id = :member_id")
+                .bind("organization_id", organizationMember.getOrganizationId())
+                .bind("member_id", organizationMember.getMemberId())
+                .bind("org_role_id", organizationMember.getUserRoleId())
+                .fetch().rowsUpdated();
+    }
+
 }

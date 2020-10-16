@@ -104,9 +104,9 @@ public class OrganizationMemberServiceImpl implements OrganizationMemberService 
                                                             )
                                                     );
                                                 }
-                                                // TODO создать dao для обновления только роли, а орг ид и мембер ид не должны меняться сразу для всех
-                                                return repository
-                                                        .save(organizationMember)
+                                                return dao
+                                                        .update(organizationMember)
+                                                        .then(repository.findByMemberIdAndOrganizationId(organizationMember.getMemberId(), organizationMember.getOrganizationId()))
                                                         .map(saved -> {
                                                             log.debug(String.format(" @method [ Mono<OrganizationMemberDTO> update (Mono<OrganizationMemberDTO> organizationMemberDTOMono) ] ->  @body after @call repository.save(organizationMember: %s", saved));
                                                             OrganizationMemberDTO organizationMemberDTO = mapper.toDTO(saved);
