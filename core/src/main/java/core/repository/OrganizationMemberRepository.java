@@ -14,4 +14,5 @@ public interface OrganizationMemberRepository extends ReactiveCrudRepository<Org
     Flux<OrganizationMember> findAllByOrganizationId(UUID organizationId);
     Mono<Void> deleteByMemberIdAndOrganizationId(String memberId, UUID organizationId);
     Mono<OrganizationMember> findByMemberIdAndOrganizationId(String memberId, UUID organizationId);
+    Flux<OrganizationMember> findAllByMemberIdAndOrganizationId(String memberId, UUID organizationId);
 }

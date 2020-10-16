@@ -1,7 +1,6 @@
 package core.service.impl;
 
 import api.dto.OrganizationMemberDTO;
-import core.entity.Organization;
 import core.exception.CustomRequestException;
 import core.mapper.OrganizationMemberMapper;
 import core.repository.OrganizationMemberDAO;
@@ -49,9 +48,10 @@ public class OrganizationMemberServiceImpl implements OrganizationMemberService 
                                             )
                                     );
                                 }
+                                log.debug(String.format(" @method [ Mono<OrganizationMemberDTO> create (Mono<OrganizationMemberDTO> organizationMemberDTOMono) ] -> @body after @call organizationRepository.findById(organizationMember.getOrganizationId()).hasElement(): %s", organizationMember.getOrganizationId()));
                                 return repository
-                                        .findByMemberIdAndOrganizationId(organizationMember.getMemberId(), organizationMember.getOrganizationId())
-                                        .hasElement()
+                                        .findAllByMemberIdAndOrganizationId(organizationMember.getMemberId(), organizationMember.getOrganizationId())
+                                        .hasElements()
                                         .flatMap(isPresent -> {
                                             if (isPresent) {
                                                 return Mono.error(
@@ -61,7 +61,7 @@ public class OrganizationMemberServiceImpl implements OrganizationMemberService 
                                                         )
                                                 );
                                             }
-                                            log.debug(String.format(" @method [ Mono<OrganizationMemberDTO> create (Mono<OrganizationMemberDTO> organizationMemberDTOMono) ] -> @call repository.save(organizationMember): %s", organizationMember));
+                                            log.debug(String.format(" @method [ Mono<OrganizationMemberDTO> create (Mono<OrganizationMemberDTO> organizationMemberDTOMono) ] -> @call dao.create(organizationMember): %s", organizationMember));
                                             return dao.create(organizationMember)
                                                     .then(repository.findByMemberIdAndOrganizationId(organizationMember.getMemberId(), organizationMember.getOrganizationId())
                                                             .map(saved -> {
@@ -93,8 +93,8 @@ public class OrganizationMemberServiceImpl implements OrganizationMemberService 
                                 log.debug(String.format(" @method [ Mono<OrganizationMemberDTO> update (Mono<OrganizationMemberDTO> organizationMemberDTOMono) ] ->  @body after @call repository..existsByOrganizationId(organizationMember.getOrganizationId()): %s", exist));
                                 if (exist) {
                                     return repository
-                                            .findByMemberIdAndOrganizationId(organizationMember.getMemberId(), organizationMember.getOrganizationId())
-                                            .hasElement()
+                                            .findAllByMemberIdAndOrganizationId(organizationMember.getMemberId(), organizationMember.getOrganizationId())
+                                            .hasElements()
                                             .flatMap(isPresent -> {
                                                 if (!isPresent) {
                                                     return Mono.error(
