@@ -15,7 +15,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @Table("organization")
 public class Organization {
-
     @Id
     @Column("organization_id")
     private UUID id;
@@ -30,5 +29,4 @@ public class Organization {
     // The last modify of the row in table
     @Column("last_modify")
     private ZonedDateTime lastModify;
-
 }

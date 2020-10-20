@@ -2,12 +2,12 @@ package core.service.impl;
 
 import api.dto.OrganizationDTO;
 import core.entity.Organization;
-import core.entity.OrganizationRoleMember;
+import core.entity.OrganizationMember;
 import core.exception.CustomRequestException;
 import core.mapper.OrganizationMapper;
 import core.repository.OrganizationRepository;
-import core.repository.OrganizationRoleMemberDAO;
-import core.repository.OrganizationRoleMemberRepository;
+import core.repository.OrganizationMemberDAO;
+import core.repository.OrganizationMemberRepository;
 import core.service.OrganizationService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,10 +24,10 @@ import java.util.UUID;
 @Slf4j
 public class OrganizationServiceImpl implements OrganizationService {
 
-    private final OrganizationRoleMemberDAO dao;
+    private final OrganizationMemberDAO dao;
 
     private final OrganizationRepository repository;
-    private final OrganizationRoleMemberRepository memberRepository;
+    private final OrganizationMemberRepository memberRepository;
     private final OrganizationMapper mapper;
 
     @Transactional
@@ -52,14 +52,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                                 .findById(organization.getId())
                                 .flatMap(result -> {
                                     log.debug(String.format(" @method [ Mono<OrganizationDTO> update (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call repository.findById(organization.getId()): %s", result));
-                                    if (result.getId() == null) {
-                                        return Mono.error(
-                                                new CustomRequestException(
-                                                        String.format("ERROR ATLAS-7: Invalid organization id = %s", result.getId()),
-                                                        HttpStatus.BAD_REQUEST)
-                                        );
-                                    }
-                                    else if (!organization.getOwnerUserId().equals(result.getOwnerUserId())) { // if saving ownerId does not match ownerId in db
+                                    if (!organization.getOwnerUserId().equals(result.getOwnerUserId())) { // if saving ownerId does not match ownerId in db
                                         return Mono.error(
                                                 new CustomRequestException(
                                                         String.format("ERROR ATLAS-8: Owner ids does not match: expected %s, was %2$s", result.getOwnerUserId(), organization.getOwnerUserId()),
@@ -76,7 +69,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                                                             .map(found -> {
                                                                 log.debug(String.format(" @method [ Mono<OrganizationDTO> update (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call repository.findById(organization): %s", found));
                                                                 OrganizationDTO organizationDTO = mapper.toDTO(found);
-                                                                log.debug(String.format(" @method [ Mono<OrganizationDTO> update (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call mapper.toDTO(saved) : %s",  organizationDTO));
+                                                                log.debug(String.format(" @method [ Mono<OrganizationDTO> update (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call mapper.toDTO(saved) : %s", organizationDTO));
                                                                 return organizationDTO;
                                                             });
                                                 });
@@ -116,9 +109,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                                 return repository.save(organization).flatMap(saved -> {
                                     log.debug(String.format(" @method [ Mono<OrganizationDTO> create (Mono<OrganizationDTO> organizationDTOMono) ] ->  @body after @call repository.save(organization): %s", saved));
                                     Mono<Organization> findById = repository.findById(saved.getId());
-                                    OrganizationRoleMember organizationRoleMember = new OrganizationRoleMember(saved.getId(), saved.getOwnerUserId(), 1);
-                                    log.debug(String.format(" @method [ Mono<OrganizationDTO> create (Mono<OrganizationDTO> organizationDTOMono) ] ->  @body before @call dao.create(organizationRoleMember): %s", organizationRoleMember));
-                                    return dao.create(organizationRoleMember)
+                                    OrganizationMember organizationMember = new OrganizationMember(saved.getId(), saved.getOwnerUserId(), 1);
+                                    log.debug(String.format(" @method [ Mono<OrganizationDTO> create (Mono<OrganizationDTO> organizationDTOMono) ] ->  @body before @call dao.create(organizationRoleMember): %s", organizationMember));
+                                    return dao.create(organizationMember)
                                             .then(findById)
                                             .map(found -> {
                                                 log.debug(String.format(" @method [ Mono<OrganizationDTO> create (Mono<OrganizationDTO> organizationDTOMono) ] -> @body after @call repository.findById(organization): %s", found));

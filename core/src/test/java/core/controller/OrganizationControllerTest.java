@@ -2,13 +2,13 @@ package core.controller;
 
 import api.dto.OrganizationDTO;
 import core.entity.Organization;
-import core.entity.OrganizationRoleMember;
+import core.entity.OrganizationMember;
 import core.exception.CustomExceptionHandler;
 import core.mapper.OrganizationMapper;
 import core.mapper.OrganizationMapperImpl;
 import core.repository.OrganizationRepository;
-import core.repository.OrganizationRoleMemberDAO;
-import core.repository.OrganizationRoleMemberRepository;
+import core.repository.OrganizationMemberDAO;
+import core.repository.OrganizationMemberRepository;
 import core.service.impl.OrganizationServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -37,9 +37,9 @@ class OrganizationControllerTest {
     @MockBean
     private OrganizationRepository repository;
     @MockBean
-    private OrganizationRoleMemberRepository memberRepository;
+    private OrganizationMemberRepository memberRepository;
     @MockBean
-    private OrganizationRoleMemberDAO dao;
+    private OrganizationMemberDAO dao;
 
     @Autowired
     private OrganizationMapper mapper;
@@ -79,6 +79,8 @@ class OrganizationControllerTest {
                 .expectBody(CustomExceptionHandler.class);
     }
 
+
+
     @Test
     @WithMockUser
     void testUpdateOrganizationIdInvalid() {
@@ -100,6 +102,43 @@ class OrganizationControllerTest {
 
         Mockito.when(repository.findById(organizationDTO.getId()))
                 .thenReturn(Mono.empty());
+
+        webTestClient
+                .mutateWith(csrf())
+                .put()
+                .uri("/api/organizations")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(organizationDTO), OrganizationDTO.class)
+                .exchange()
+                .expectStatus().is4xxClientError()
+                .expectBody(CustomExceptionHandler.class);
+    }
+
+    @Test
+    @WithMockUser
+    void testUpdateOrganizationOwnerUserIdInvalidError() {
+        OrganizationDTO organizationDTO = new OrganizationDTO(
+                UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
+                "Organization Name",
+                "organization-name",
+                "d43405ef-eb60-47c9-88ed-f4a732a1eab8",
+                "img"
+        );
+
+        OrganizationDTO returnDTO = new OrganizationDTO(
+                UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
+                "Organization Name2",
+                "organization-name2",
+                "77777777-7777-7777-7777-f4a732a1eab8",
+                "img"
+        );
+
+        Mockito.when(repository.save(mapper.toEntity(organizationDTO)))
+                .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
+        Mockito.when(repository.findByValidName("organization-name"))
+                .thenReturn(Mono.just(organizationDTO).map(mapper::toEntity));
+        Mockito.when(repository.findById(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
+                .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
 
         webTestClient
                 .mutateWith(csrf())
@@ -176,14 +215,14 @@ class OrganizationControllerTest {
                 "img"
         );
 
-        OrganizationRoleMember organizationRoleMember = new OrganizationRoleMember(
+        OrganizationMember organizationMember = new OrganizationMember(
                 UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"), organizationDTO.getOwnerUserId(), 1
         );
         Mockito.when(repository.findByValidName("organization-name"))
                 .thenReturn(Mono.empty());
         Mockito.when(repository.save(mapper.toEntity(organizationDTO)))
                 .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
-        Mockito.when(dao.create(organizationRoleMember))
+        Mockito.when(dao.create(organizationMember))
                 .thenReturn(Mono.just(1));
         Mockito.when(repository.findById(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
                 .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
@@ -204,6 +243,44 @@ class OrganizationControllerTest {
                     Assertions.assertEquals(returnDTO.getOwnerUserId(), result.getResponseBody().getOwnerUserId());
                     Assertions.assertEquals(returnDTO.getImg(), result.getResponseBody().getImg());
                 });
+
+    }
+
+    @Test
+    @WithMockUser
+    void testCreateOrganizationAlreadyExistsError() {
+
+        OrganizationDTO organizationDTO = new OrganizationDTO(
+                null,
+                "Organization Name",
+                "organization-name",
+                "d43405ef-eb60-47c9-88ed-f4a732a1eab8",
+                "img"
+        );
+
+        OrganizationDTO returnDTO = new OrganizationDTO(
+                UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
+                "Organization Name",
+                "organization-name",
+                "d43405ef-eb60-47c9-88ed-f4a732a1eab8",
+                "img"
+        );
+
+        OrganizationMember organizationMember = new OrganizationMember(
+                UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"), organizationDTO.getOwnerUserId(), 1
+        );
+        Mockito.when(repository.findByValidName("organization-name"))
+                .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
+
+        webTestClient
+                .mutateWith(csrf())
+                .post()
+                .uri("/api/organizations")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(organizationDTO), OrganizationDTO.class)
+                .exchange()
+                .expectStatus().is4xxClientError()
+                .expectBody(CustomExceptionHandler.class);
 
     }
 
@@ -286,12 +363,12 @@ class OrganizationControllerTest {
     @WithMockUser
     void testFindByUserIdOrganization() {
 
-        OrganizationRoleMember organizationRoleMember_1 = new OrganizationRoleMember(
+        OrganizationMember organizationMember_1 = new OrganizationMember(
                 UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
                 "github|13",
                 1
         );
-        OrganizationRoleMember organizationRoleMember_2 = new OrganizationRoleMember(
+        OrganizationMember organizationMember_2 = new OrganizationMember(
                 UUID.fromString("d43405ef-ba1c-4c4b-8cfd-11f54b23113b"),
                 "github|13",
                 2
@@ -321,7 +398,7 @@ class OrganizationControllerTest {
                 .collect(Collectors.toList());
 
         Mockito.when(memberRepository.findAllByMemberId("github|13"))
-                .thenReturn(Flux.just(organizationRoleMember_1, organizationRoleMember_2));
+                .thenReturn(Flux.just(organizationMember_1, organizationMember_2));
         Mockito.when(repository.findById(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
                 .thenReturn(Mono.just(returnOrganization_1));
         Mockito.when(repository.findById(UUID.fromString("d43405ef-ba1c-4c4b-8cfd-11f54b23113b")))
