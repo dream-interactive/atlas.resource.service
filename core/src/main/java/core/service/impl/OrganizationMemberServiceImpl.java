@@ -50,8 +50,8 @@ public class OrganizationMemberServiceImpl implements OrganizationMemberService 
                                 }
                                 log.debug(String.format(" @method [ Mono<OrganizationMemberDTO> create (Mono<OrganizationMemberDTO> organizationMemberDTOMono) ] -> @body after @call organizationRepository.findById(organizationMember.getOrganizationId()).hasElement(): %s", organizationMember.getOrganizationId()));
                                 return repository
-                                        .findAllByMemberIdAndOrganizationId(organizationMember.getMemberId(), organizationMember.getOrganizationId())
-                                        .hasElements()
+                                        .findByMemberIdAndOrganizationId(organizationMember.getMemberId(), organizationMember.getOrganizationId())
+                                        .hasElement()
                                         .flatMap(isPresent -> {
                                             if (isPresent) {
                                                 return Mono.error(
@@ -93,8 +93,8 @@ public class OrganizationMemberServiceImpl implements OrganizationMemberService 
                                 log.debug(String.format(" @method [ Mono<OrganizationMemberDTO> update (Mono<OrganizationMemberDTO> organizationMemberDTOMono) ] ->  @body after @call repository..existsByOrganizationId(organizationMember.getOrganizationId()): %s", exist));
                                 if (exist) {
                                     return repository
-                                            .findAllByMemberIdAndOrganizationId(organizationMember.getMemberId(), organizationMember.getOrganizationId())
-                                            .hasElements()
+                                            .findByMemberIdAndOrganizationId(organizationMember.getMemberId(), organizationMember.getOrganizationId())
+                                            .hasElement()
                                             .flatMap(isPresent -> {
                                                 if (!isPresent) {
                                                     return Mono.error(

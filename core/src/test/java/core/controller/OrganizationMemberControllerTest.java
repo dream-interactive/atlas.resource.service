@@ -50,6 +50,7 @@ class OrganizationMemberControllerTest {
 
     @Test
     @WithMockUser
+    @SuppressWarnings("unchecked")
     void testCreateOrganizationMember() {
         OrganizationMemberDTO organizationMemberDTO = new OrganizationMemberDTO(
                 UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
@@ -75,12 +76,10 @@ class OrganizationMemberControllerTest {
                 .thenReturn(Mono.just(returnOrganizationMemberDTO).map(mapper::toEntity));
         Mockito.when(organizationRepository.findById(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
                 .thenReturn(Mono.just(organization));
-        Mockito.when(repository.findAllByMemberIdAndOrganizationId("github13", UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
-                .thenReturn(Flux.empty());
+        Mockito.when(repository.findByMemberIdAndOrganizationId("github13", UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
+                .thenReturn(Mono.empty(), Mono.just(returnOrganizationMemberDTO).map(mapper::toEntity));
         Mockito.when(dao.create(mapper.toEntity(organizationMemberDTO)))
                 .thenReturn(Mono.just(1));
-        Mockito.when(repository.findByMemberIdAndOrganizationId("github13", UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
-                .thenReturn(Mono.just(returnOrganizationMemberDTO).map(mapper::toEntity));
 
         webTestClient
                 .mutateWith(csrf())
@@ -127,8 +126,8 @@ class OrganizationMemberControllerTest {
 
         Mockito.when(organizationRepository.findById(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
                 .thenReturn(Mono.just(organization));
-        Mockito.when(repository.findAllByMemberIdAndOrganizationId("github13", UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
-                .thenReturn(Flux.just(organizationMemberDTO).map(mapper::toEntity));
+        Mockito.when(repository.findByMemberIdAndOrganizationId("github13", UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
+                .thenReturn(Mono.just(organizationMemberDTO).map(mapper::toEntity));
         Mockito.when(dao.create(mapper.toEntity(organizationMemberDTO)))
                 .thenReturn(Mono.just(1));
 
@@ -176,6 +175,7 @@ class OrganizationMemberControllerTest {
 
     @Test
     @WithMockUser
+    @SuppressWarnings("unchecked")
     void testUpdateOrganizationMember() {
         OrganizationMemberDTO organizationMemberDTO = new OrganizationMemberDTO(
                 UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
@@ -192,12 +192,10 @@ class OrganizationMemberControllerTest {
                 .thenReturn(Mono.just(returnOrganizationMemberDTO).map(mapper::toEntity));
         Mockito.when(repository.findAllByOrganizationId(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
                 .thenReturn(Flux.just(mapper.toEntity(returnOrganizationMemberDTO)));
-        Mockito.when(repository.findAllByMemberIdAndOrganizationId("github13", UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
-                .thenReturn(Flux.just(mapper.toEntity(returnOrganizationMemberDTO)));
+        Mockito.when(repository.findByMemberIdAndOrganizationId("github13", UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
+                .thenReturn(Mono.just(mapper.toEntity(returnOrganizationMemberDTO)), Mono.just(returnOrganizationMemberDTO).map(mapper::toEntity));
         Mockito.when(dao.update(mapper.toEntity(organizationMemberDTO)))
                 .thenReturn(Mono.just(1));
-        Mockito.when(repository.findByMemberIdAndOrganizationId("github13", UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
-                .thenReturn(Mono.just(returnOrganizationMemberDTO).map(mapper::toEntity));
 
         webTestClient
                 .mutateWith(csrf())
@@ -259,8 +257,8 @@ class OrganizationMemberControllerTest {
 
         Mockito.when(repository.findAllByOrganizationId(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
                 .thenReturn(Flux.just(mapper.toEntity(organizationMemberDTO)));
-        Mockito.when(repository.findAllByMemberIdAndOrganizationId("github13", UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
-                .thenReturn(Flux.empty());
+        Mockito.when(repository.findByMemberIdAndOrganizationId("github13", UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
+                .thenReturn(Mono.empty());
 
         webTestClient
                 .mutateWith(csrf())
