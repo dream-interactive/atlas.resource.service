@@ -74,7 +74,7 @@ class ProjectControllerTest {
 
         when(repository.save(mapper.toEntity(projectDTO)))
                 .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
-        when(repository.findByOrganizationIdAndKey(UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),"PRJC"))
+        when(repository.findByOrganizationIdAndKey(UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"), "PRJC"))
                 .thenReturn(Mono.empty());
         when(dao.create(projectRoleMember))
                 .thenReturn(Mono.just(1));
@@ -92,11 +92,11 @@ class ProjectControllerTest {
                 .expectStatus().isCreated()
                 .expectBody(ProjectDTO.class)
                 .consumeWith(result -> {
-                    Assertions.assertEquals( returnDTO.getId(), result.getResponseBody().getId());
-                    Assertions.assertEquals( returnDTO.getName(), result.getResponseBody().getName());
-                    Assertions.assertEquals( returnDTO.getKey(), result.getResponseBody().getKey());
-                    Assertions.assertEquals( returnDTO.getLeadId(), result.getResponseBody().getLeadId());
-                    Assertions.assertEquals( returnDTO.getType(), result.getResponseBody().getType());
+                    Assertions.assertEquals(returnDTO.getId(), result.getResponseBody().getId());
+                    Assertions.assertEquals(returnDTO.getName(), result.getResponseBody().getName());
+                    Assertions.assertEquals(returnDTO.getKey(), result.getResponseBody().getKey());
+                    Assertions.assertEquals(returnDTO.getLeadId(), result.getResponseBody().getLeadId());
+                    Assertions.assertEquals(returnDTO.getType(), result.getResponseBody().getType());
                 });
     }
 
@@ -124,7 +124,7 @@ class ProjectControllerTest {
                 null,
                 false);
 
-        when(repository.findByOrganizationIdAndKey(UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),"PRJC"))
+        when(repository.findByOrganizationIdAndKey(UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"), "PRJC"))
                 .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
 
         webTestClient
@@ -202,11 +202,16 @@ class ProjectControllerTest {
                 false,
                 null);
 
-        ProjectMember projectRoleMember = new ProjectMember(newDTO.getId(), 2, newDTO.getLeadId());// 2 -> hard code id in table role_in_project
+        ProjectMember projectRoleMember = new ProjectMember(
+                UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
+                2,
+                "github|5"
+        );// 2 -> hard code id in table role_in_project
 
 
         when(repository.findById(newDTO.getId()))
-                .thenReturn(Mono.just(exist), Mono.just(returned));
+                .thenReturn(Mono.just(exist))
+                .thenReturn(Mono.just(returned));
 
         when(repository.save(mapper.toEntity(newDTO)))
                 .thenReturn(Mono.just(exist));
@@ -250,7 +255,7 @@ class ProjectControllerTest {
                 null,
                 false);
 
-        Project returned = new Project (
+        Project returned = new Project(
                 UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
                 "ProjectName2",
                 "PRJC",
@@ -263,9 +268,8 @@ class ProjectControllerTest {
 
 
         when(repository.findById(newDTO.getId()))
-                .thenReturn(
-                        Mono.just(existDTO).map(mapper::toEntity),
-                        Mono.just(returned));
+                .thenReturn(Mono.just(existDTO).map(mapper::toEntity))
+                .thenReturn(Mono.just(returned));
 
         when(repository.save(mapper.toEntity(newDTO)))
                 .thenReturn(Mono.just(existDTO).map(mapper::toEntity));
@@ -326,9 +330,9 @@ class ProjectControllerTest {
         when(projectRoleMemberRepository.findAllByMemberId("github|wffio3r2fjcc2v90bxi5"))
                 .thenReturn(Flux.just(projectRoleMember, projectRoleMember1));
 
-        when(repository.findById(  UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
+        when(repository.findById(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e")))
                 .thenReturn(Mono.just(returnProject1));
-        when(repository.findById(  UUID.fromString("d43405ef-ba1c-4c4b-8cfd-11f54b23972e")))
+        when(repository.findById(UUID.fromString("d43405ef-ba1c-4c4b-8cfd-11f54b23972e")))
                 .thenReturn(Mono.just(returnProject2));
 
         webTestClient
