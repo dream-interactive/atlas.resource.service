@@ -2,7 +2,7 @@ package core.controller;
 
 import api.dto.ProjectDTO;
 import core.entity.Project;
-import core.entity.ProjectRoleMember;
+import core.entity.ProjectMember;
 import core.exception.CustomExceptionHandler;
 import core.mapper.ProjectMapper;
 import core.mapper.ProjectMapperImpl;
@@ -12,12 +12,10 @@ import core.repository.ProjectRoleMemberRepository;
 import core.service.impl.ProjectServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -72,7 +70,7 @@ class ProjectControllerTest {
                 null,
                 false);
 
-        ProjectRoleMember projectRoleMember = new ProjectRoleMember(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"), 2, "github|wffio3r2fjcc2v90bxi5");
+        ProjectMember projectRoleMember = new ProjectMember(UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"), 2, "github|wffio3r2fjcc2v90bxi5");
 
         when(repository.save(mapper.toEntity(projectDTO)))
                 .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
@@ -182,6 +180,17 @@ class ProjectControllerTest {
                 null,
                 false);
 
+        Project exist = new Project(
+                UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
+                "ProjectName2",
+                "PRJC",
+                UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),
+                1,
+                "github|5",
+                null,
+                false,
+                null);
+
         Project returned = new Project (
                 UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
                 "ProjectName2",
@@ -193,25 +202,14 @@ class ProjectControllerTest {
                 false,
                 null);
 
-
-        ProjectDTO existDTO = new ProjectDTO(
-                UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
-                "ProjectName2",
-                "PRJC",
-                UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),
-                "SCRUM",
-                "github|5",
-                null,
-                false);
-
-        ProjectRoleMember projectRoleMember = new ProjectRoleMember(newDTO.getId(), 2, newDTO.getLeadId());// 2 -> hard code id in table role_in_project
+        ProjectMember projectRoleMember = new ProjectMember(newDTO.getId(), 2, newDTO.getLeadId());// 2 -> hard code id in table role_in_project
 
 
-        when(repository.findById(newDTO.getId())).thenReturn(Mono.just(existDTO).map(mapper::toEntity));
-        when(repository.findById(newDTO.getId())).thenReturn(Mono.just(returned));
+        when(repository.findById(newDTO.getId()))
+                .thenReturn(Mono.just(exist), Mono.just(returned));
 
         when(repository.save(mapper.toEntity(newDTO)))
-                .thenReturn(Mono.just(existDTO).map(mapper::toEntity));
+                .thenReturn(Mono.just(exist));
 
         when(dao.reassignLead(projectRoleMember))
                 .thenReturn(Mono.just(1));
@@ -225,7 +223,7 @@ class ProjectControllerTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(ProjectDTO.class)
-                .isEqualTo(newDTO);
+                .isEqualTo(mapper.toDTO(returned));
     }
 
     @Test
@@ -242,6 +240,16 @@ class ProjectControllerTest {
                 null,
                 false);
 
+        ProjectDTO existDTO = new ProjectDTO(
+                UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
+                "ProjectName",
+                "PRJC",
+                UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),
+                "SCRUM",
+                "github|4",
+                null,
+                false);
+
         Project returned = new Project (
                 UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
                 "ProjectName2",
@@ -254,18 +262,10 @@ class ProjectControllerTest {
                 null);
 
 
-        ProjectDTO existDTO = new ProjectDTO(
-                UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
-                "ProjectName",
-                "PRJC",
-                UUID.fromString("d43405ef-eb60-47c9-88ed-f4a732a1eab8"),
-                "SCRUM",
-                "github|4",
-                null,
-                false);
-
-        when(repository.findById(newDTO.getId())).thenReturn(Mono.just(existDTO).map(mapper::toEntity));
-        when(repository.findById(newDTO.getId())).thenReturn(Mono.just(returned));
+        when(repository.findById(newDTO.getId()))
+                .thenReturn(
+                        Mono.just(existDTO).map(mapper::toEntity),
+                        Mono.just(returned));
 
         when(repository.save(mapper.toEntity(newDTO)))
                 .thenReturn(Mono.just(existDTO).map(mapper::toEntity));
@@ -287,13 +287,13 @@ class ProjectControllerTest {
     @WithMockUser
     void testFindByUserId() {
 
-        ProjectRoleMember projectRoleMember =
-                new ProjectRoleMember(
+        ProjectMember projectRoleMember =
+                new ProjectMember(
                         UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
                         2,
                         "github|wffio3r2fjcc2v90bxi5");
-        ProjectRoleMember projectRoleMember1 =
-                new ProjectRoleMember(
+        ProjectMember projectRoleMember1 =
+                new ProjectMember(
                         UUID.fromString("d43405ef-ba1c-4c4b-8cfd-11f54b23972e"),
                         2,
                         "github|wffio3r2fjcc2v90bxi5");

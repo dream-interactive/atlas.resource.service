@@ -1,13 +1,3 @@
-create table if not exists atlas_errors
-(
-    id int not null,
-    code varchar(5) not null default ('ATLAS'),
-    title varchar(250) not null ,
-    description text,
-
-    constraint atlas_errors_pkey primary key (code, id)
-);
-
 
 insert into atlas_errors (id, code, title, description) values (1, 'ATLAS', 'Project with this key already exist in your organization.', null);
 insert into atlas_errors (id, code, title, description) values (2, 'ATLAS', 'Organization with this name already exists.', null);
@@ -20,4 +10,5 @@ insert into atlas_errors (id, code, title, description) values (8, 'ATLAS', 'Own
 insert into atlas_errors (id, code, title, description) values (9, 'ATLAS', 'Member with id %s is already exists in organization %2$s', 'Instead of %s, you need to substitute member id, %2$s - organization id');
 insert into atlas_errors (id, code, title, description) values (10, 'ATLAS', 'Invalid organization member role id - %d', 'Instead of %d, you need to substitute user role id');
 insert into atlas_errors (id, code, title, description) values (11, 'ATLAS', 'Invalid organization member role - %s', 'Instead of %d, you need to substitute user role');
+insert into atlas_errors (id, code, title, description) values (12, 'ATLAS', 'Invalid organization member role - %s', 'Instead of %d, you need to substitute user role');
 

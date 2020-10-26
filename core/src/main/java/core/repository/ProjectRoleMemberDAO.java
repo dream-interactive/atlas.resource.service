@@ -1,10 +1,10 @@
 package core.repository;
 
-import core.entity.ProjectRoleMember;
+import core.entity.ProjectMember;
 import reactor.core.publisher.Mono;
 
 public interface ProjectRoleMemberDAO {
 
-    Mono<Integer> create (ProjectRoleMember projectRoleMember);
-    Mono<Integer> reassignLead (ProjectRoleMember projectRoleMember);
+    Mono<Integer> create (ProjectMember projectRoleMember);
+    Mono<Integer> reassignLead (ProjectMember projectRoleMember);
 }

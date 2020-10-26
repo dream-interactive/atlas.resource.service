@@ -1,10 +1,21 @@
 package api.dto;
 
-import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-//TODO
+import java.time.ZonedDateTime;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class AtlasUserAuthDTO {
-    private UUID id;
+
     private String sub;
+    private String nickname;
+    private String name;
+    private String picture;
     private String email;
+    private Boolean emailVerified;
+    private ZonedDateTime updatedAt;
 }

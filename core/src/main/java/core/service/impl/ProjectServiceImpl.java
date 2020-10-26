@@ -2,7 +2,7 @@ package core.service.impl;
 
 import api.dto.ProjectDTO;
 import core.entity.Project;
-import core.entity.ProjectRoleMember;
+import core.entity.ProjectMember;
 import core.exception.CustomRequestException;
 import core.mapper.ProjectMapper;
 import core.repository.ProjectRepository;
@@ -11,15 +11,11 @@ import core.repository.ProjectRoleMemberRepository;
 import core.service.ProjectService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.UUID;
 
 @Service
 @AllArgsConstructor
@@ -56,7 +52,7 @@ public class ProjectServiceImpl implements ProjectService {
                                         .flatMap(saved -> {
                                             log.debug(" @method [ Mono<ProjectDTO> create (Mono<ProjectDTO> projectDTOMono) ] -> @body after @call repository.save(project): " + saved);
                                             Mono<Project> findById = repository.findById(saved.getId());
-                                            ProjectRoleMember projectRoleMember = new ProjectRoleMember(saved.getId(), 2, saved.getLeadId());// 2 -> hard code id in table role_in_project
+                                            ProjectMember projectRoleMember = new ProjectMember(saved.getId(), 2, saved.getLeadId());// 2 -> hard code id in table role_in_project
                                             return dao.create(projectRoleMember)
                                                     .then(findById) // switch on Mono<Project> findById
                                                     .map(found -> {
@@ -118,15 +114,11 @@ public class ProjectServiceImpl implements ProjectService {
         log.debug(" @method [ Mono<ProjectDTO> updateIfLeadChanged (Project incomingProject) ] -> @call repository.save(incomingProject)");
         return repository.save(incomingProject)
                 .flatMap(updated -> {
-
                     log.debug(" @method [ Mono<ProjectDTO> updateIfLeadChanged (Project incomingProject) ] -> @body after @call repository.save(incomingProject): " + updated);
-                    Mono<Project> findById = repository.findById(updated.getId());
-
-                    ProjectRoleMember projectRoleMember = new ProjectRoleMember(updated.getId(), 2, updated.getLeadId());// 2 -> hard code id in table role_in_project
-
+                    ProjectMember projectRoleMember = new ProjectMember(updated.getId(), 2, updated.getLeadId());// 2 -> hard code id in table role_in_project
 
                     return dao.reassignLead(projectRoleMember)
-                            .then(findById) // call Mono<Project> findById
+                            .then(repository.findById(updated.getId())) // call Mono<Project> findById
                             .map(found -> {
                                 log.debug(" @method [ Mono<ProjectDTO> updateIfLeadChanged (Project incomingProject) ] -> @body after @call repository.findById(saved.getId()) : " + found);
                                 ProjectDTO projectDTO = mapper.toDTO(found);

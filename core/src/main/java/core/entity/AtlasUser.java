@@ -10,19 +10,29 @@ import org.springframework.data.relational.core.mapping.Table;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
+/**
+ * Represent the User's profile entity of Auth0
+ * */
+
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table("atlas_user")
+@Table("user_profile")
 public class AtlasUser {
 
     @Id
-    @Column("user_id")
-    private UUID id;
+    @Column("sub_user_id")
     private String sub;
+    @Column("nickname")
+    private String nickname;
+    private String name;
+    private String picture;
     private String email;
 
-    @Column("last_modify")
-    private ZonedDateTime lastModify; // The last modify of the row in table
+    @Column("email_verified")
+    private Boolean emailVerified;
+
+  @Column("last_modify")
+  private ZonedDateTime updatedAt;
 }

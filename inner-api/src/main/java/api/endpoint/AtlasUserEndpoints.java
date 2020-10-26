@@ -1,25 +1,40 @@
 package api.endpoint;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON;
 
-import org.springframework.web.reactive.function.server.RequestPredicate;
-import org.springframework.web.reactive.function.server.ServerRequest;
+import api.dto.AtlasUserAuthDTO;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import reactor.core.publisher.Mono;
 
-
-import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
-import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
-import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
  * Represents the endpoints for AtlasUser.
  * This interface follows reactive and functionality paradigms.
  *
  * @author Maksym Sevriukov
- * @see RequestPredicate
- * @see ServerRequest
+ * @see reactor.core.publisher.Flux
+ * @see reactor.core.publisher.Mono
  */
+
+@RequestMapping(value = "api/users", produces = APPLICATION_JSON_VALUE)
 public interface AtlasUserEndpoints {
-    RequestPredicate findAll = GET("/users").and(accept(APPLICATION_JSON));
-    RequestPredicate save = POST("/users").and(accept(APPLICATION_JSON));
-    RequestPredicate findById = GET("/users/{id}").and(accept(APPLICATION_JSON));
+
+    @PostMapping
+    @ResponseStatus(code = HttpStatus.CREATED)
+    Mono<AtlasUserAuthDTO> create(@RequestBody Mono<AtlasUserAuthDTO> dto);
+
+    @PutMapping
+    @ResponseStatus(code = HttpStatus.OK)
+    Mono<AtlasUserAuthDTO> update(@RequestBody Mono<AtlasUserAuthDTO> dto);
+
+    @GetMapping
+    @ResponseStatus(code = HttpStatus.OK)
+    Mono<AtlasUserAuthDTO> findById(@RequestParam("sub") String sub);
 }
