@@ -1,7 +1,6 @@
 package core.service.impl;
 
 import api.dto.AtlasUserAuthDTO;
-import core.entity.AtlasUser;
 import core.exception.CustomRequestException;
 import core.mapper.AtlasUserAuthMapper;
 import core.repository.AtlasUserDAO;
@@ -24,8 +23,6 @@ public class AtlasUserServiceImpl implements AtlasUserService {
 
     @Override
     public Mono<AtlasUserAuthDTO> findById(String sub) {
-log.debug(String.format(" @method [ Mono<AtlasUserAuthDTO> findById (String sub) ] -> @body  %s", sub));
-
         return repository
                 .findById(sub)
                 .map(mapper::toDTO)
@@ -41,28 +38,29 @@ log.debug(String.format(" @method [ Mono<AtlasUserAuthDTO> findById (String sub)
     public Mono<AtlasUserAuthDTO> create(Mono<AtlasUserAuthDTO> userDTOMono) {
         return userDTOMono
                 .map(dto -> {
-log.debug(String.format(" @method [ Mono<AtlasUserAuthDTO> create (Mono<AtlasUserAuthDTO> userDTOMono) ] -> @body  %s", dto));
+                    log.debug(String.format(" @method [ Mono<AtlasUserAuthDTO> create (Mono<AtlasUserAuthDTO> userDTOMono) ] -> @body  %s", dto));
                     return mapper.toEntity(dto);
                 })
-                .flatMap(user -> dao
-                        .create(user)
-                        .flatMap(index -> repository.findById(user.getSub()).map(u -> {
-log.debug(String.format(" @method [ Mono<AtlasUserAuthDTO> create (Mono<AtlasUserAuthDTO> userDTOMono) ] -> @body  after dao.create(user) %s", u));
-                                    return mapper.toDTO(u);
-                                })
-                        ));
+                .flatMap(user -> dao.create(user)
+                        .then(repository.findById(user.getSub()))
+                        .map(found -> {
+                            log.debug(String.format(" @method [ Mono<AtlasUserAuthDTO> create (Mono<AtlasUserAuthDTO> userDTOMono) ] -> @body  after dao.create(user) %s", found));
+                            return mapper.toDTO(found);
+                        }));
     }
 
     @Override
     public Mono<AtlasUserAuthDTO> update(Mono<AtlasUserAuthDTO> userDTOMono) {
         return userDTOMono
                 .map(dto -> {
-log.debug(String.format(" @method [ Mono<AtlasUserAuthDTO> update (Mono<AtlasUserAuthDTO> userDTOMono) ] -> @body  %s", dto));
+                    log.debug(String.format(" @method [ Mono<AtlasUserAuthDTO> update (Mono<AtlasUserAuthDTO> userDTOMono) ] -> @body  %s", dto));
                     return mapper.toEntity(dto);
                 })
-                .flatMap(user -> repository.save(user).map( u -> {
-log.debug(String.format(" @method [ Mono<AtlasUserAuthDTO> update (Mono<AtlasUserAuthDTO> userDTOMono) ] -> @body  after repository.save(user) %s", u));
-                    return mapper.toDTO(u);
+                .flatMap(user -> dao.update(user)
+                        .then(repository.findById(user.getSub()))
+                        .map( found -> {
+                        log.debug(String.format(" @method [ Mono<AtlasUserAuthDTO> update (Mono<AtlasUserAuthDTO> userDTOMono) ] -> @body  after dao.update(user) %s", found));
+                        return mapper.toDTO(found);
                 }));
     }
 }

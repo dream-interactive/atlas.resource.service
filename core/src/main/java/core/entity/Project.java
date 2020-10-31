@@ -26,6 +26,10 @@ public class Project {
     @Column("organization_id")
     private UUID organizationId;
 
+    /**
+     * 1 - SCRUM
+     * 2 - KANBAN
+     */
     @Column("project_type_id")
     private Integer typeId;
 

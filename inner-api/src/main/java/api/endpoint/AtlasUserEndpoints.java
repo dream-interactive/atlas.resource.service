@@ -4,6 +4,7 @@ package api.endpoint;
 import api.dto.AtlasUserAuthDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,7 +35,7 @@ public interface AtlasUserEndpoints {
     @ResponseStatus(code = HttpStatus.OK)
     Mono<AtlasUserAuthDTO> update(@RequestBody Mono<AtlasUserAuthDTO> dto);
 
-    @GetMapping
+    @GetMapping("/{sub}")
     @ResponseStatus(code = HttpStatus.OK)
-    Mono<AtlasUserAuthDTO> findById(@RequestParam("sub") String sub);
+    Mono<AtlasUserAuthDTO> findById(@PathVariable("sub") String sub);
 }

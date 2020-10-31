@@ -203,9 +203,9 @@ class ProjectControllerTest {
                 null);
 
         ProjectMember projectRoleMember = new ProjectMember(
-                UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
+                newDTO.getId(),
                 2,
-                "github|5"
+                "github|4"
         );// 2 -> hard code id in table role_in_project
 
 
@@ -214,7 +214,7 @@ class ProjectControllerTest {
                 .thenReturn(Mono.just(returned));
 
         when(repository.save(mapper.toEntity(newDTO)))
-                .thenReturn(Mono.just(exist));
+                .thenReturn(Mono.just(returned));
 
         when(dao.reassignLead(projectRoleMember))
                 .thenReturn(Mono.just(1));
