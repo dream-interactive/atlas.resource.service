@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 @Repository
-public interface AtlasUserRepository extends ReactiveCrudRepository<AtlasUser, UUID> {
+public interface AtlasUserRepository extends ReactiveCrudRepository<AtlasUser, String> {
 
 }
 

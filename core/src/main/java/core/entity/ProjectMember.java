@@ -12,7 +12,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table("project_role_member")
-public class ProjectRoleMember {
+public class ProjectMember {
     @Column("project_id")
     private UUID projectId;
     @Column("role_id")

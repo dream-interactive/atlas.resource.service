@@ -92,14 +92,6 @@ class OrganizationControllerTest {
                 "img"
         );
 
-        OrganizationDTO returnDTO = new OrganizationDTO(
-                UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
-                "Organization Name",
-                "organization-name",
-                "d43405ef-eb60-47c9-88ed-f4a732a1eab8",
-                "img"
-        );
-
         Mockito.when(repository.findById(organizationDTO.getId()))
                 .thenReturn(Mono.empty());
 
