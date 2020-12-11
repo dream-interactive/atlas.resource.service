@@ -1,24 +1,28 @@
 create function last_modify() returns trigger
 as $$
-    begin
-        NEW.last_modify = current_timestamp;
-    end;
+begin
+    NEW.last_modify = current_timestamp;
+    RETURN NEW;
+end;
 $$ LANGUAGE plpgsql;
 
 
 create table if not exists user_profile
 (
     sub_user_id varchar(255) unique not null,
-    name  varchar(255)  not null,
-    nickname  varchar(255)  not null,
-    picture  text  not null,
     email varchar not null,
     email_verified boolean not null,
-
-    last_modify timestamp with time zone not null,
+    family_name varchar not null,
+    given_name varchar not null,
+    name  varchar(255)  not null,
+    local varchar not null default 'en',
+    picture  text  not null,
+    last_modify timestamp with time zone not null default current_timestamp,
 
     constraint user_profile_pkey primary key (sub_user_id)
 );
+create trigger user_profile_last_modify
+    after update on user_profile execute procedure last_modify();
 
 create table if not exists organization
 (
@@ -138,16 +142,4 @@ create table project_role_member
             references user_profile(sub_user_id) on delete cascade
 );
 create index not_unique_index_project_role on project_role_member (project_id, role_id);
-
-/*errors codes*/
-
-create table if not exists atlas_errors
-(
-    id int unique not null,
-    code varchar(5) not null default ('ATLAS'),
-    title varchar(250) not null ,
-    description text,
-
-    constraint atlas_errors_pkey primary key (code, id)
-);
 

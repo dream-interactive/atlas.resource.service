@@ -1,13 +1,15 @@
 package core.controller;
 
 import api.dto.AtlasUserAuthDTO;
+import api.dto.AtlasUserDTO;
 import api.endpoint.AtlasUserEndpoints;
 import core.service.AtlasUserService;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RestController
 public class AtlasUserController implements AtlasUserEndpoints {
 
@@ -19,12 +21,23 @@ public class AtlasUserController implements AtlasUserEndpoints {
     }
 
     @Override
-    public Mono<AtlasUserAuthDTO> update(Mono<AtlasUserAuthDTO> dto) {
+    public Mono<AtlasUserAuthDTO> updateEmailVerification(Mono<AtlasUserAuthDTO> dto) {
+        return service.updateEmailVerification(dto);
+    }
+
+    @Override
+    public Mono<AtlasUserAuthDTO> findAtlasUserAuthById(String sub) {
+        return service.findAtlasUserAuthById(sub);
+    }
+
+    @Override
+    public Mono<AtlasUserDTO> update(Mono<AtlasUserDTO> dto) {
         return service.update(dto);
     }
 
     @Override
-    public Mono<AtlasUserAuthDTO> findById(String sub) {
-        return service.findById(sub);
+    public Mono<AtlasUserDTO> findAtlasUserById(String sub) {
+        return service.findAtlasUserById(sub);
     }
+
 }

@@ -38,8 +38,8 @@ public class OrganizationController implements OrganizationEndpoints {
     }
 
     @Override
-    public Mono<Boolean> existByValidName(String validName) {
-        return service.existByValidName(validName);
+    public Mono<OrganizationDTO> findByValidName(String validName) {
+        return service.findByValidName(validName);
     }
 
     @Override

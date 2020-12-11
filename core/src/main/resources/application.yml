@@ -4,34 +4,39 @@ cors:
   domain:
     uri: http://localhost:4200
 
-auth0:
+# auth0:
   # Replace with the API Identifier for your Auth0 API.
-  audience: https://atlas-s.eu.auth0.com/api/v2/
+#  audience: https://atlas.com
+
+
+#okta:
+#  oauth2:
+#    issuer: https://{yourOktaDomain}/oauth2/default
+#    client-id: {yourClientId}
+#    client-secret: {yourClientSecret}
 
 # The following is standard Spring Security OAuth2 configuration.
+okta:
+  oauth2:
+    issuer: ${OKTA_OAUTH2_ISSUER}
+    client-id: ${OKTA_OAUTH2_CLIENT_ID}
+    client-secret: ${OKTA_OAUTH2_CLIENT_SECRET}
 spring:
   application:
     name: atlas-service
   security:
     oauth2:
+      client:
+        provider:
+          okta:
+            issuer-uri: ${OKTA_OAUTH2_ISSUER}
+        registration:
+          okta:
+            client-id: ${OKTA_OAUTH2_CLIENT_ID}
+            client-secret: ${OKTA_OAUTH2_CLIENT_SECRET}
       resourceserver:
         jwt:
-          # Replace with the domain of your Auth0 tenant.
-          # Note the trailing slash is important!
-          issuer-uri: https://atlas-s.eu.auth0.com/
-     #client:
-     #  registration:
-     #    auth0:
-     #      client-id: WnJyOd4btxmLg93R9VMZnab6vlFOUdbb
-     #      client-secret: YLSVp3B2LOialcKPNlWbCgn9UcBAMyy_5mxykR13ZYq6mgAeeGWEmdloiIYY1Uzh
-     #      scope:
-     #        - openid
-     #        - profile
-     #        - email
-     #  provider:
-     #    auth0:
-     #      # trailing slash is important!
-     #      issuer-uri: https://atlas-s.eu.auth0.com/
+          issuer-uri: ${OKTA_OAUTH2_ISSUER}
   r2dbc:
     # url: r2dbc:postgresql://ec2-34-251-118-151.eu-west-1.compute.amazonaws.com:5432/d8g1sr68qsfuqi
     # password: bd481e7581e264f62651c238e1ab6f7e44da59eab74024ad88bf7aa6693cef5b

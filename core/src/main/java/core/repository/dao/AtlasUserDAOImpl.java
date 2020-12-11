@@ -3,44 +3,65 @@ package core.repository.dao;
 import core.entity.AtlasUser;
 import core.repository.AtlasUserDAO;
 import lombok.AllArgsConstructor;
-import org.springframework.data.r2dbc.core.DatabaseClient;
+import lombok.RequiredArgsConstructor;
+import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
+import java.util.Random;
 
 @Repository
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class AtlasUserDAOImpl implements AtlasUserDAO {
 
     private final DatabaseClient client;
-
 
     @Override
     public Mono<Integer> create(AtlasUser user) {
         Objects.requireNonNull(user, "user");
         return client
-                .execute("insert into user_profile(sub_user_id, nickname, name, picture, email, email_verified, last_modify) " +
-                        "values (:sub_user_id, :nickname, :name, :picture, :email, :email_verified, :last_modify)")
+                .sql("insert into user_profile(sub_user_id, email, email_verified, family_name, given_name, name, local, picture) " +
+                        "values (:sub_user_id, :email, :email_verified, :family_name, :given_name, :name, :local, :picture)")
                 .bind("sub_user_id", user.getSub())
-                .bind("nickname", user.getNickname())
-                .bind("name", user.getName())
-                .bind("picture", user.getPicture())
                 .bind("email", user.getEmail())
                 .bind("email_verified", user.getEmailVerified())
-                .bind("last_modify", user.getUpdatedAt())
+                .bind("family_name", user.getFamilyName())
+                .bind("given_name", user.getGivenName())
+                .bind("name", user.getName())
+                .bind("local", user.getLocal())
+                .bind("picture", setPicture())
                 .fetch().rowsUpdated();
+    }
+
+    private String setPicture() {
+        Random random = new Random();
+        switch (random.nextInt(3)) {
+            case 0: return "assets/images/user/alien.svg";
+            case 1: return "assets/images/user/alien_1.svg";
+            default: return "assets/images/user/alien_2.svg";
+        }
     }
 
     @Override
     public Mono<Integer> update(AtlasUser user) {
         Objects.requireNonNull(user, "user");
         return client
-                .execute("update user_profile set name = :name, nickname = :nickname, picture = :picture, email_verified = :email_verified")
+                .sql("update user_profile set family_name = :family_name, given_name = :given_name, name = :name, local = :local, picture = :picture where sub_user_id = :sub_user_id")
+                .bind("family_name", user.getFamilyName())
+                .bind("given_name", user.getGivenName())
                 .bind("name", user.getName())
-                .bind("nickname", user.getNickname())
-                .bind("picture", user.getPicture())
-                .bind("email_verified", user.getEmailVerified())
+                .bind("local", user.getLocal())
+                .bind("picture", user.getUserPicture())
+                .fetch().rowsUpdated();
+    }
+
+    @Override
+    public Mono<Integer> updateEmailVerification(boolean emailVerification, String sub) {
+        return client
+                .sql("update user_profile set email_verified = :email_verified where sub_user_id = :sub_user_id")
+                .bind("email_verified", emailVerification)
+                .bind("sub_user_id", sub)
                 .fetch().rowsUpdated();
     }
 

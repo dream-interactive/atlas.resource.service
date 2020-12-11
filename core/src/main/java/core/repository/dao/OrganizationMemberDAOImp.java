@@ -3,7 +3,7 @@ package core.repository.dao;
 import core.entity.OrganizationMember;
 import core.repository.OrganizationMemberDAO;
 import lombok.AllArgsConstructor;
-import org.springframework.data.r2dbc.core.DatabaseClient;
+import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
@@ -15,7 +15,7 @@ public class OrganizationMemberDAOImp implements OrganizationMemberDAO {
 
     public Mono<Integer> create(OrganizationMember organizationMember) {
         return db
-                .execute("insert into org_role_member (organization_id, member_id, org_role_id) values (:organization_id, :member_id, :org_role_id)")
+                .sql("insert into org_role_member (organization_id, member_id, org_role_id) values (:organization_id, :member_id, :org_role_id)")
                 .bind("organization_id", organizationMember.getOrganizationId())
                 .bind("member_id", organizationMember.getMemberId())
                 .bind("org_role_id", organizationMember.getUserRoleId())
@@ -24,7 +24,7 @@ public class OrganizationMemberDAOImp implements OrganizationMemberDAO {
 
     public Mono<Integer> update(OrganizationMember organizationMember) {
         return db
-                .execute("update org_role_member set org_role_id = :org_role_id where organization_id = :organization_id and member_id = :member_id")
+                .sql("update org_role_member set org_role_id = :org_role_id where organization_id = :organization_id and member_id = :member_id")
                 .bind("organization_id", organizationMember.getOrganizationId())
                 .bind("member_id", organizationMember.getMemberId())
                 .bind("org_role_id", organizationMember.getUserRoleId())

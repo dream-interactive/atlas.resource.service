@@ -1,32 +1,51 @@
 package core.service.impl;
 
 import api.dto.ProjectDTO;
+
 import core.entity.Project;
 import core.entity.ProjectMember;
 import core.exception.CustomRequestException;
 import core.mapper.ProjectMapper;
+import core.repository.OrganizationMemberRepository;
+import core.repository.OrganizationRepository;
 import core.repository.ProjectRepository;
 import core.repository.ProjectRoleMemberDAO;
 import core.repository.ProjectRoleMemberRepository;
 import core.service.ProjectService;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.json.JsonParser;
+import org.springframework.boot.json.JsonParserFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.security.Principal;
+import java.util.Map;
+import java.util.UUID;
+
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRoleMemberDAO dao;
-
     private final ProjectRepository repository;
     private final ProjectRoleMemberRepository projectRoleMemberRepository;
     private final ProjectMapper mapper;
+
+    private final OrganizationMemberRepository organizationMemberRepository;
+    private final OrganizationRepository organizationRepository;
+
 
     @Transactional
     public Mono<ProjectDTO>create(Mono<ProjectDTO> projectDTOMono) {
@@ -109,7 +128,7 @@ public class ProjectServiceImpl implements ProjectService {
                             });
                 });
     }
-    
+
     private Mono<ProjectDTO> updateIfLeadChanged(Project incomingProject) {
         log.debug(" @method [ Mono<ProjectDTO> updateIfLeadChanged (Project incomingProject) ] -> @call repository.save(incomingProject)");
         return repository.save(incomingProject)
@@ -142,5 +161,68 @@ public class ProjectServiceImpl implements ProjectService {
                     });
                 });
     }
+    /**
+     *
+     * @param oid - organization id
+     * @param ovn - organization valid name
+     * @param pk - project key
+     *
+     * */
+    @Override
+    public Flux<ProjectDTO> findAll(UUID oid, String ovn, String pk) {
 
+        if (oid == null && ovn == null && pk == null) {
+            return Flux.empty();
+            // TODO for admins
+        } else if (ovn != null && pk != null) {
+            return organizationRepository.findByValidName(ovn) // find organization
+                    .flatMapMany(organization -> {
+                         return repository.findByOrganizationIdAndKey(organization.getId(), pk) // find project
+                                 .flatMapMany(project -> {
+                                    if (project.getIsPrivate()) { // if project is private check that user have permissions to access
+                                        return getPrincipal() // get user principal fro token
+                                                .flatMapMany( principal -> {
+                                                    System.out.println(principal.getClaims());
+                                                    return organizationMemberRepository
+                                                            .findAllByMemberId(principal.getClaim("uid")) // get user id
+                                                            .filter(organizationMember -> organizationMember.getOrganizationId().equals(organization.getId()))
+                                                            .flatMap(org ->  repository.findByOrganizationIdAndKey(org.getOrganizationId(), pk).map(mapper::toDTO))
+                                                            .switchIfEmpty(
+                                                                    Mono.defer(() -> {
+                                                                        log.error(String.format(" @method [ Flux<ProjectDTO> findAll(UUID oid, String ovn, String pk, String token) ] -> " +
+                                                                                "[ ERROR ATLAS-14: You have not permissions to access this project. ] -> [ uid is %1$s ] -> [Project is %2$s ]", principal.getClaim("uid"), project));
+                                                                        return Mono.error(
+                                                                                new CustomRequestException(
+                                                                                        "ERROR ATLAS-14: You have not permissions to access this project.",
+                                                                                        HttpStatus.BAD_REQUEST)
+                                                                        );
+                                                                    }));
+                                                });
+                                    } else {
+                                        return Flux.just(project).map(mapper::toDTO);
+                                    }
+                                });
+                    })
+                    .switchIfEmpty(
+                            Mono.defer(() -> {
+                                log.error(String.format(" @method [ Flux<ProjectDTO> findAll(UUID oid, String ovn, String pk, String token) ] -> [ ERROR ATLAS-15: Couldn't find such an organization!  - %s ]", ovn));
+                                return Mono.error(
+                                        new CustomRequestException(
+                                                String.format("ERROR ATLAS-3: Could not find organization! - %s", ovn),
+                                                HttpStatus.BAD_REQUEST)
+                                );
+                            })
+                    );
+        } else {
+            return Flux.empty();
+        }
+    }
+
+    private Mono<Jwt> getPrincipal() {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(context -> {
+                    Authentication authentication = context.getAuthentication();
+                    return (Jwt) authentication.getPrincipal();
+                });
+    }
 }

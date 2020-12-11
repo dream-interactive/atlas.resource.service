@@ -2,6 +2,7 @@ package api.endpoint;
 
 
 import api.dto.AtlasUserAuthDTO;
+import api.dto.AtlasUserDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,11 +32,20 @@ public interface AtlasUserEndpoints {
     @ResponseStatus(code = HttpStatus.CREATED)
     Mono<AtlasUserAuthDTO> create(@RequestBody Mono<AtlasUserAuthDTO> dto);
 
+    @PutMapping("/email_verification")
+    @ResponseStatus(code = HttpStatus.OK)
+    Mono<AtlasUserAuthDTO> updateEmailVerification(@RequestBody Mono<AtlasUserAuthDTO> dto);
+
+
+    @GetMapping("/auth")
+    @ResponseStatus(code = HttpStatus.OK)
+    Mono<AtlasUserAuthDTO> findAtlasUserAuthById(@RequestParam("sub") String sub);
+
     @PutMapping
     @ResponseStatus(code = HttpStatus.OK)
-    Mono<AtlasUserAuthDTO> update(@RequestBody Mono<AtlasUserAuthDTO> dto);
+    Mono<AtlasUserDTO> update(@RequestBody Mono<AtlasUserDTO> dto);
 
     @GetMapping("/{sub}")
     @ResponseStatus(code = HttpStatus.OK)
-    Mono<AtlasUserAuthDTO> findById(@PathVariable("sub") String sub);
+    Mono<AtlasUserDTO> findAtlasUserById(@PathVariable("sub") String sub);
 }

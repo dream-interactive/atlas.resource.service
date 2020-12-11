@@ -11,6 +11,4 @@ import java.util.UUID;
 @Repository
 public interface ProjectRepository extends ReactiveCrudRepository<Project, UUID> {
     Mono<Project> findByOrganizationIdAndKey(UUID organizationId, String key);
-
-    Mono<Boolean> existsByOrganizationIdAndName(UUID organizationId, String name);
 }

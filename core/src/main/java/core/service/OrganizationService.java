@@ -18,6 +18,5 @@ public interface OrganizationService {
 
     Flux<OrganizationDTO> findByUserId(String userId);
 
-    Mono<Boolean> existByValidName(String userId);
-
+    Mono<OrganizationDTO> findByValidName(String validName);
 }

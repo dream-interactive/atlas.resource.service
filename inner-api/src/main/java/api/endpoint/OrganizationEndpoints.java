@@ -40,7 +40,7 @@ public interface OrganizationEndpoints {
 
     @GetMapping(params = "validName")
     @ResponseStatus(code = HttpStatus.OK)
-    Mono<Boolean> existByValidName(@RequestParam(value = "validName") String validName);
+    Mono<OrganizationDTO> findByValidName(@RequestParam(value = "validName") String validName);
 
     @GetMapping(params = "userId")
     @ResponseStatus(code = HttpStatus.OK)
