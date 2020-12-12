@@ -8,6 +8,5 @@ import reactor.core.publisher.Flux;
 
 @Repository
 public interface AtlasExceptionRepository extends R2dbcRepository<AtlasException, Integer> {
-    Flux<AtlasException> findAllByPrivateExceptionFalse();
 }
 

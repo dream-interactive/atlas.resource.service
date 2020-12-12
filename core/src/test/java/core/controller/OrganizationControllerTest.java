@@ -326,30 +326,30 @@ class OrganizationControllerTest {
 
     }
 
-    @Test
-    @WithMockUser
-    void testExistsByValidNameOrganization() {
-
-        OrganizationDTO returnDTO = new OrganizationDTO(
-                UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
-                "Organization Name",
-                "organization-name",
-                "d43405ef-eb60-47c9-88ed-f4a732a1eab8",
-                "img"
-        );
-
-        Mockito.when(repository.findByValidName("organization-name"))
-                .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
-
-        webTestClient
-                .mutateWith(csrf())
-                .get()
-                .uri("/api/organizations?validName=organization-name")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(Boolean.class)
-                .consumeWith(result -> Assertions.assertTrue(Objects.requireNonNull(result.getResponseBody())));
-    }
+    // @Test
+    // @WithMockUser
+    // void testExistsByValidNameOrganization() {
+//
+    //     OrganizationDTO returnDTO = new OrganizationDTO(
+    //             UUID.fromString("e9e45e28-ba1c-4c4b-8cfd-11f54b23972e"),
+    //             "Organization Name",
+    //             "organization-name",
+    //             "d43405ef-eb60-47c9-88ed-f4a732a1eab8",
+    //             "img"
+    //     );
+//
+    //     Mockito.when(repository.findByValidName("organization-name"))
+    //             .thenReturn(Mono.just(returnDTO).map(mapper::toEntity));
+//
+    //     webTestClient
+    //             .mutateWith(csrf())
+    //             .get()
+    //             .uri("/api/organizations?validName=organization-name")
+    //             .exchange()
+    //             .expectStatus().isOk()
+    //             .expectBody(Boolean.class)
+    //             .consumeWith(result -> Assertions.assertTrue(Objects.requireNonNull(result.getResponseBody())));
+    // }
 
     @Test
     @WithMockUser

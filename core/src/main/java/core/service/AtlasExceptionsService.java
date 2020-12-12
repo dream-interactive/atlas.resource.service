@@ -6,5 +6,4 @@ import reactor.core.publisher.Flux;
 public interface AtlasExceptionsService {
 
     Flux<AtlasExceptionDTO> findAll();
-    Flux<AtlasExceptionDTO> findAllPublic();
 }

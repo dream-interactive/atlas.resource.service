@@ -19,9 +19,4 @@ public class AtlasExceptionsServiceImpl implements AtlasExceptionsService {
     public Flux<AtlasExceptionDTO> findAll() {
         return repository.findAll().map(mapper::toDTO);
     }
-
-    @Override
-    public Flux<AtlasExceptionDTO> findAllPublic() {
-        return repository.findAllByPrivateExceptionFalse().map(mapper::toDTO);
-    }
 }

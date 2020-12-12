@@ -4,6 +4,5 @@ create table atlas_exceptions (
     key varchar not null default 'ATLAS',
     section varchar not null,
     title text not null,
-    description text,
-    is_private boolean not null
+    description text
 )

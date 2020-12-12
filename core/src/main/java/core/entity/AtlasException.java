@@ -23,6 +23,4 @@ public class AtlasException {
     private String section; // project, organization, ticket etc
     private String title;
     private String description; // description for programmer
-    @Column("is_private")
-    private boolean privateException;
 }

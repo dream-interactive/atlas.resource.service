@@ -20,13 +20,9 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RequestMapping(value = "api/exceptions", produces = APPLICATION_JSON_VALUE)
 public interface AtlasExceptionsEndpoint {
 
-    @GetMapping("/private")
-    @ResponseStatus(code = HttpStatus.OK)
-    Flux<AtlasExceptionDTO> findAll();
-
     @GetMapping
     @ResponseStatus(code = HttpStatus.OK)
-    Flux<AtlasExceptionDTO> findAllPublic();
+    Flux<AtlasExceptionDTO> findAll();
 
 }
 

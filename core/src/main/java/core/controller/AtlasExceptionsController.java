@@ -19,8 +19,4 @@ public class AtlasExceptionsController implements AtlasExceptionsEndpoint {
         return service.findAll();
     }
 
-    @Override
-    public Flux<AtlasExceptionDTO> findAllPublic() {
-        return service.findAllPublic();
-    }
 }

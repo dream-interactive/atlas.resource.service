@@ -18,7 +18,7 @@ public class SecurityConfig {
                 .cors()
                 .and()
                 .authorizeExchange()
-                .pathMatchers(HttpMethod.GET,"/api/exceptions/private").hasAuthority("Admins")
+                .pathMatchers(HttpMethod.GET,"/api/exceptions").hasAuthority("Admins")
                 .anyExchange().authenticated()
                 .and()
                 .oauth2ResourceServer()
