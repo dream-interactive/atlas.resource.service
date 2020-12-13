@@ -48,14 +48,14 @@ public class AtlasUserServiceImpl implements AtlasUserService {
                 } else {
                     log.error(String.format(
                         " @method [ Mono<AtlasUserAuthDTO> updateEmailVerification(Mono<AtlasUserAuthDTO> dto ] -> " +
-                        "ERROR ATLAS-102: user ids does not match. "                                                 +
+                        "ATLAS-102: user ids does not match. "                                                       +
                         "[ Principal: %1$s ], "                                                                      +
                         "[ atlasUserAuthDTO.getSub(): %2$s ] "                                                       ,
                         uid,
                         atlasUserAuthDTO.getSub()));
                     return Mono.error(
                             new CustomRequestException(
-                                    "ERROR ATLAS-102",
+                                    "ATLAS-102",
                                     HttpStatus.NOT_MODIFIED)
                     );
                 }
@@ -68,7 +68,7 @@ public class AtlasUserServiceImpl implements AtlasUserService {
         if (sub.trim().isEmpty()) {
             return Mono.error(
                     new CustomRequestException(
-                            "ERROR ATLAS-12: User id can't be null or empty!",
+                            "ATLAS-100: User id can't be empty.",
                             HttpStatus.BAD_REQUEST)
             );
         }

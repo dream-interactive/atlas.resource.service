@@ -21,6 +21,10 @@ public class AtlasException {
     private Integer aeid; // atlas exception id
     private String key; // ATLAS, JDK, SQL
     private String section; // project, organization, ticket etc
+    @Column("messageinlog")
+    private String messageInLog; // message in log
+    @Column("messageinthrow")
+    private String messageInThrow; // message in throw
     private String title;
     private String description; // description for programmer
 }
