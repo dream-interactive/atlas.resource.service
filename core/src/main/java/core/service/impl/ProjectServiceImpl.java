@@ -63,7 +63,7 @@ public class ProjectServiceImpl implements ProjectService {
                                 if(isPresent && project.getId() == null) { // project with orgId and key exist, and new project should create
                                     return Mono.error(
                                             new CustomRequestException(
-                                                    "ERROR ATLAS-1: Project with this key already exist in your organization.",
+                                                    "ATLAS-200: Project with this key already exist in your organization.",
                                                     HttpStatus.CONFLICT)
                                     );
                                 }

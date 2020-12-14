@@ -47,12 +47,13 @@ public class AtlasUserServiceImpl implements AtlasUserService {
                             });
                 } else {
                     log.error(String.format(
-                        " @method [ Mono<AtlasUserAuthDTO> updateEmailVerification(Mono<AtlasUserAuthDTO> dto ] -> " +
-                        "ATLAS-102: user ids does not match. "                                                       +
-                        "[ Principal: %1$s ], "                                                                      +
-                        "[ atlasUserAuthDTO.getSub(): %2$s ] "                                                       ,
-                        uid,
-                        atlasUserAuthDTO.getSub()));
+                            " @method [ Mono<AtlasUserAuthDTO> updateEmailVerification(Mono<AtlasUserAuthDTO> dto ] -> " +
+                            "ATLAS-102: user ids does not match. "                                                       +
+                            "[ Principal: %1$s ], "                                                                      +
+                            "[ atlasUserAuthDTO.getSub(): %2$s ] "                                                       ,
+                            uid,
+                            atlasUserAuthDTO.getSub()
+                    ));
                     return Mono.error(
                             new CustomRequestException(
                                     "ATLAS-102",
