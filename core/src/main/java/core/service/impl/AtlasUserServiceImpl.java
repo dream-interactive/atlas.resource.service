@@ -19,6 +19,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
+
 @RequiredArgsConstructor
 @Service
 @Slf4j
@@ -76,11 +78,12 @@ public class AtlasUserServiceImpl implements AtlasUserService {
         return repository
                 .findBySub(sub.trim())
                 .map(mapperAuth::toDTO)
-                .switchIfEmpty(
-                        Mono.error(new CustomRequestException(
-                                String.format("ERROR ATLAS-12: Could not find user with sub - %s", sub),
-                                HttpStatus.NOT_FOUND)
-                        )
+                .switchIfEmpty(Mono.error(() -> {
+                    log.error(String.format("ATLAS-101: Could not find user by ID - %s", sub));
+                                return new CustomRequestException(
+                                    "ATLAS-101: Could not find user.",
+                                    HttpStatus.NOT_FOUND);
+                        })
                 );
     }
     @Override
@@ -88,7 +91,7 @@ public class AtlasUserServiceImpl implements AtlasUserService {
         if (sub.trim().isEmpty()) {
             return Mono.error(
                     new CustomRequestException(
-                            "ERROR ATLAS-12: User id can't be empty!",
+                            "ATLAS-100: User id can't be empty.",
                             HttpStatus.BAD_REQUEST)
             );
         }
@@ -96,10 +99,15 @@ public class AtlasUserServiceImpl implements AtlasUserService {
                 .findBySub(sub)
                 .map(mapper::toDTO)
                 .switchIfEmpty(
-                        Mono.error(new CustomRequestException(
-                                String.format("ERROR ATLAS-12: Could not find user with sub - %s", sub),
-                                HttpStatus.NOT_FOUND)
-                        )
+                        Mono.error(() -> {
+                            log.error(String.format(
+                                    " @method [ Mono<AtlasUserAuthDTO> findAtlasUserById (String sub) ] ->" +
+                                    " ATLAS-101: Could not find user by ID - %s"                            ,
+                                    sub));
+                            return new CustomRequestException(
+                                    "ATLAS-101: Could not find user.",
+                                    HttpStatus.NOT_FOUND);
+                        })
                 );
     }
 
@@ -107,13 +115,20 @@ public class AtlasUserServiceImpl implements AtlasUserService {
     public Mono<AtlasUserAuthDTO> create(Mono<AtlasUserAuthDTO> userDTOMono) {
         return userDTOMono
                 .map(dto -> {
-                    log.debug(String.format(" @method [ Mono<AtlasUserAuthDTO> create (Mono<AtlasUserAuthDTO> userDTOMono) ] -> @body  %s", dto));
+                    log.debug(String.format(
+                            " @method [ Mono<AtlasUserAuthDTO> create (Mono<AtlasUserAuthDTO> userDTOMono) ] ->" +
+                            " @body %s"                                                                          ,
+                            dto));
+                    Objects.requireNonNull(dto, "ATLAS-103: User can't be null.");
                     return mapperAuth.toEntity(dto);
                 })
                 .flatMap(user -> dao.create(user)
                         .then(repository.findBySub(user.getSub()))
                         .map(found -> {
-                            log.debug(String.format(" @method [ Mono<AtlasUserAuthDTO> create (Mono<AtlasUserAuthDTO> userDTOMono) ] -> @body  after dao.create(user) %s", found));
+                            log.debug(String.format(
+                                    " @method [ Mono<AtlasUserAuthDTO> create (Mono<AtlasUserAuthDTO> userDTOMono) ] ->" +
+                                    " @body  after dao.create(user) %s"                                                  ,
+                                    found));
                             return mapperAuth.toDTO(found);
                         }));
     }
@@ -126,13 +141,20 @@ public class AtlasUserServiceImpl implements AtlasUserService {
     public Mono<AtlasUserDTO> update(Mono<AtlasUserDTO> atlasUserDTOMono) {
         return atlasUserDTOMono
                 .map(dto -> {
-                    log.debug(String.format(" @method [ Mono<AtlasUserDTO> update(Mono<AtlasUserDTO> user) ] -> @body  %s", dto));
+                    log.debug(String.format(
+                            " @method [ Mono<AtlasUserDTO> update(Mono<AtlasUserDTO> user) ] ->" +
+                            " @body  %s"                                                         ,
+                            dto));
+                    Objects.requireNonNull(dto, "ATLAS-103: User can't be null.");
                     return mapper.toEntity(dto);
                 })
                 .flatMap(user -> dao.update(user)
                         .then(repository.findBySub(user.getSub()))
                         .map(found -> {
-                            log.debug(String.format(" @method [ Mono<AtlasUserDTO> update(Mono<AtlasUserDTO> user) ] -> @body  after dao.update(user) %s", found));
+                            log.debug(String.format(
+                                    " @method [ Mono<AtlasUserDTO> update(Mono<AtlasUserDTO> user) ] ->" +
+                                    " @body  after dao.update(user) %s"                                  ,
+                                    found));
                             return mapper.toDTO(found);
                         }));
     }

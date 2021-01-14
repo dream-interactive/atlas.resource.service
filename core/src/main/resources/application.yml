@@ -46,9 +46,9 @@ spring:
     username: atlasdev
     pool:
       enabled: true
-      initial-size: 10
-      max-idle-time: 1m
-      max-size: 30
+      initialSize: 10
+      maxIdleTime: 1m
+      maxSize: 30
   flyway:
     url: jdbc:postgresql://localhost:5432/atlas_dev
     password: root
