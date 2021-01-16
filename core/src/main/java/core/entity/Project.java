@@ -3,6 +3,7 @@ package core.entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
@@ -19,11 +20,13 @@ public class Project {
     @Id
     @Column("project_id")
     private UUID id;
-
+    @NonNull
     private String name;
+    @NonNull
     private String key;
 
     @Column("organization_id")
+    @NonNull
     private UUID organizationId;
 
     /**

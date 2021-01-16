@@ -1,7 +1,7 @@
 package core.service.impl;
 
 import api.dto.ProjectDTO;
-
+import core.entity.Organization;
 import core.entity.Project;
 import core.entity.ProjectMember;
 import core.exception.CustomRequestException;
@@ -12,25 +12,18 @@ import core.repository.ProjectRepository;
 import core.repository.ProjectRoleMemberDAO;
 import core.repository.ProjectRoleMemberRepository;
 import core.service.ProjectService;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.json.JsonParser;
-import org.springframework.boot.json.JsonParserFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.security.Principal;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -51,11 +44,17 @@ public class ProjectServiceImpl implements ProjectService {
     public Mono<ProjectDTO>create(Mono<ProjectDTO> projectDTOMono) {
         return projectDTOMono
                 .map(projectDTO -> {
-                    log.debug(" @method [ Mono<ProjectDTO> create (Mono<ProjectDTO> projectDTOMono) ] -> @body: " + projectDTO );
+                    log.debug(
+                            " @method [ Mono<ProjectDTO> create (Mono<ProjectDTO> projectDTOMono) ] ->" +
+                            " @body: "                                                                  +
+                            projectDTO );
                     return mapper.toEntity(projectDTO);
                 })
                 .flatMap(project -> {
-                    log.debug(" @method [ Mono<ProjectDTO> create (Mono<ProjectDTO> projectDTOMono) ] -> @body after @call mapper.toEntity(projectDTO): " + project);
+                    log.debug(
+                            " @method [ Mono<ProjectDTO> create (Mono<ProjectDTO> projectDTOMono) ] ->" +
+                            " @body after @call mapper.toEntity(projectDTO): "                          +
+                            project);
                     return repository
                             .findByOrganizationIdAndKey(project.getOrganizationId(), project.getKey())
                             .hasElement()
@@ -69,15 +68,24 @@ public class ProjectServiceImpl implements ProjectService {
                                 }
                                 return repository.save(project)
                                         .flatMap(saved -> {
-                                            log.debug(" @method [ Mono<ProjectDTO> create (Mono<ProjectDTO> projectDTOMono) ] -> @body after @call repository.save(project): " + saved);
+                                            log.debug(
+                                                    " @method [ Mono<ProjectDTO> create (Mono<ProjectDTO> projectDTOMono) ] ->" +
+                                                    " @body after @call repository.save(project): "                             +
+                                                    saved);
                                             Mono<Project> findById = repository.findById(saved.getId());
                                             ProjectMember projectRoleMember = new ProjectMember(saved.getId(), 2, saved.getLeadId());// 2 -> hard code id in table role_in_project
                                             return dao.create(projectRoleMember)
                                                     .then(findById) // switch on Mono<Project> findById
                                                     .map(found -> {
-                                                        log.debug(" @method [ Mono<ProjectDTO> create (Mono<ProjectDTO> projectDTOMono) ] -> @body after @call repository.findById(saved.getId()) : " + found);
+                                                        log.debug(
+                                                                " @method [ Mono<ProjectDTO> create (Mono<ProjectDTO> projectDTOMono) ] ->" +
+                                                                " @body after @call repository.findById(saved.getId()) : "                  +
+                                                                found);
                                                         ProjectDTO projectDTO = mapper.toDTO(found);
-                                                        log.debug(" @method [ Mono<ProjectDTO> create (Mono<ProjectDTO> projectDTOMono) ] -> @body after @call mapper.toDTO(found) : " + projectDTO);
+                                                        log.debug(
+                                                                " @method [ Mono<ProjectDTO> create (Mono<ProjectDTO> projectDTOMono) ] ->" +
+                                                                " @body after @call mapper.toDTO(found) : "                                 +
+                                                                projectDTO);
                                                         return projectDTO;
                                                     });
                                         });
@@ -89,7 +97,10 @@ public class ProjectServiceImpl implements ProjectService {
     public Mono<ProjectDTO> update (Mono<ProjectDTO> projectDTOMono){
         return projectDTOMono
                 .map(projectDTO -> {
-                    log.debug(" @method [ Mono<ProjectDTO> update (Mono<ProjectDTO> projectDTOMono) ] -> @body: " + projectDTO );
+                    log.debug(
+                            " @method [ Mono<ProjectDTO> update (Mono<ProjectDTO> projectDTOMono) ] ->"   +
+                            " @body: "                                                                    +
+                            projectDTO );
                     return mapper.toEntity(projectDTO);
                 })
                 .flatMap(project -> {
@@ -106,58 +117,90 @@ public class ProjectServiceImpl implements ProjectService {
                             .switchIfEmpty(
                                     Mono.error(
                                             new CustomRequestException(
-                                                    String.format("ERROR ATLAS-6: Invalid project id - %s.", project.getId()),
+                                                    "ATLAS-901: Could not find project.",
                                                     HttpStatus.BAD_REQUEST)
                                     )
                             );
                 });
     }
 
-
     private Mono<ProjectDTO> updateIfLeadDoesntChanged (Project incomingProject) {
+
+        Assert.notNull(incomingProject, "Project can't be null");
+
         return repository.save(incomingProject)
                 .flatMap(saved -> {
-                    log.debug(" @method [ Mono<ProjectDTO> updateIfLeadDoesntChanged (Project incomingProject) ] -> @body after @call repository.save(incomingProject): " + saved);
+                    log.debug(
+                            " @method [ Mono<ProjectDTO> updateIfLeadDoesntChanged (Project incomingProject) ] ->" +
+                            " @body after @call repository.save(incomingProject): "                                +
+                            saved);
                     Mono<Project> findById = repository.findById(saved.getId());
                     return findById
                             .map(found -> {
-                                log.debug(" @method [ Mono<ProjectDTO> updateIfLeadDoesntChanged (Project incomingProject) ] -> @body after @call repository.findById(saved.getId()) : " + found);
+                                log.debug(
+                                        " @method [ Mono<ProjectDTO> updateIfLeadDoesntChanged (Project incomingProject) ] ->" +
+                                        " @body after @call repository.findById(saved.getId()) : "                             +
+                                        found);
                                 ProjectDTO projectDTO = mapper.toDTO(found);
-                                log.debug(" @method [ Mono<ProjectDTO> updateIfLeadDoesntChanged (Project incomingProject) ] -> @body after @call mapper.toDTO(found) : " + projectDTO);
+                                log.debug(
+                                        " @method [ Mono<ProjectDTO> updateIfLeadDoesntChanged (Project incomingProject) ] ->" +
+                                        " @body after @call mapper.toDTO(found) : "                                            +
+                                        projectDTO);
                                 return projectDTO;
                             });
                 });
     }
 
     private Mono<ProjectDTO> updateIfLeadChanged(Project incomingProject) {
-        log.debug(" @method [ Mono<ProjectDTO> updateIfLeadChanged (Project incomingProject) ] -> @call repository.save(incomingProject)");
+
+        Assert.notNull(incomingProject, "Project can't be null");
+
         return repository.save(incomingProject)
                 .flatMap(updated -> {
-                    log.debug(" @method [ Mono<ProjectDTO> updateIfLeadChanged (Project incomingProject) ] -> @body after @call repository.save(incomingProject): " + updated);
+                    log.debug(
+                            " @method [ Mono<ProjectDTO> updateIfLeadChanged (Project incomingProject) ] ->" +
+                            " @body after @call repository.save(incomingProject): "                          +
+                            updated);
                     ProjectMember projectRoleMember = new ProjectMember(updated.getId(), 2, updated.getLeadId());// 2 -> hard code id in table role_in_project
 
                     return dao.reassignLead(projectRoleMember)
                             .then(repository.findById(updated.getId())) // call Mono<Project> findById
                             .map(found -> {
-                                log.debug(" @method [ Mono<ProjectDTO> updateIfLeadChanged (Project incomingProject) ] -> @body after @call repository.findById(saved.getId()) : " + found);
+                                log.debug(
+                                        " @method [ Mono<ProjectDTO> updateIfLeadChanged (Project incomingProject) ] ->" +
+                                        " @body after @call repository.findById(saved.getId()) : "                       +
+                                        found);
                                 ProjectDTO projectDTO = mapper.toDTO(found);
-                                log.debug(" @method [ Mono<ProjectDTO> updateIfLeadChanged (Project incomingProject) ] -> @body after @call mapper.toDTO(found) : " + projectDTO);
+                                log.debug(
+                                        " @method [ Mono<ProjectDTO> updateIfLeadChanged (Project incomingProject) ] ->" +
+                                        " @body after @call mapper.toDTO(found) : "                                      +
+                                        projectDTO);
                                 return projectDTO;
                             });
                 });
     }
 
     public Flux<ProjectDTO> findByUserId(String userId) {
-        log.debug(String.format(" @method [ Flux<ProjectDTO> findByUserId(String userId) ] -> @param: %s", userId));
+
+        if (userId.trim().isEmpty()) {
+            return Flux.error(
+                    new CustomRequestException("ATLAS-900: UserId can't be null or empty.", HttpStatus.BAD_REQUEST)
+            );
+        }
+
         return projectRoleMemberRepository
                 .findAllByMemberId(userId)
                 .flatMap(prm -> {
-                    log.debug(String.format(" @method [ Flux<ProjectDTO> findByUserId(String userId) ] -> @call flatMap for each element after @call projectRoleMemberRepository.findAllByMemberId(userId);  element: [ %s ]", prm));
+                    log.debug(String.format(
+                            " @method [ Flux<ProjectDTO> findByUserId(String userId) ] ->"                                                       +
+                            " @call flatMap for each element after @call projectRoleMemberRepository.findAllByMemberId(userId);  element: [ %s ]",
+                            prm));
                     return repository.findById(prm.getProjectId()).map( project -> {
-                        log.debug(String.format("  @method [ Flux<ProjectDTO> findByUserId(String userId) ] -> @body after @call repository.findById(prm.getProjectId()) for each element %s", project ));
-                        ProjectDTO projectDTO = mapper.toDTO(project);
-                        log.debug(String.format("  @method [ Flux<ProjectDTO> findByUserId(String userId) ] -> @body after @call mapper.toDTO(found) for each element %s", projectDTO ));
-                        return projectDTO;
+                        log.debug(String.format(
+                                " @method [ Flux<ProjectDTO> findByUserId(String userId) ] ->"                      +
+                                " @body after @call repository.findById(prm.getProjectId()) for each element %s"    ,
+                                project ));
+                        return mapper.toDTO(project);
                     });
                 });
     }
@@ -175,47 +218,63 @@ public class ProjectServiceImpl implements ProjectService {
             return Flux.empty();
             // TODO for admins
         } else if (ovn != null && pk != null) {
+            if (ovn.trim().isEmpty() || pk.trim().isEmpty()) {
+                return Flux.error(
+                        new CustomRequestException(
+                                "ATLAS-900: Organization valid name or project key can't be empty.",
+                                HttpStatus.BAD_REQUEST)
+                );
+            }
+
             return organizationRepository.findByValidName(ovn) // find organization
                     .flatMapMany(organization -> {
                          return repository.findByOrganizationIdAndKey(organization.getId(), pk) // find project
                                  .flatMapMany(project -> {
                                     if (project.getIsPrivate()) { // if project is private check that user have permissions to access
-                                        return getPrincipal() // get user principal fro token
-                                                .flatMapMany( principal -> {
-                                                    System.out.println(principal.getClaims());
-                                                    return organizationMemberRepository
-                                                            .findAllByMemberId(principal.getClaim("uid")) // get user id
-                                                            .filter(organizationMember -> organizationMember.getOrganizationId().equals(organization.getId()))
-                                                            .flatMap(org ->  repository.findByOrganizationIdAndKey(org.getOrganizationId(), pk).map(mapper::toDTO))
-                                                            .switchIfEmpty(
-                                                                    Mono.defer(() -> {
-                                                                        log.error(String.format(" @method [ Flux<ProjectDTO> findAll(UUID oid, String ovn, String pk, String token) ] -> " +
-                                                                                "[ ERROR ATLAS-14: You have not permissions to access this project. ] -> [ uid is %1$s ] -> [Project is %2$s ]", principal.getClaim("uid"), project));
-                                                                        return Mono.error(
-                                                                                new CustomRequestException(
-                                                                                        "ERROR ATLAS-14: You have not permissions to access this project.",
-                                                                                        HttpStatus.BAD_REQUEST)
-                                                                        );
-                                                                    }));
-                                                });
+                                        return ifProjectIsPrivate(pk, organization, project);
                                     } else {
                                         return Flux.just(project).map(mapper::toDTO);
                                     }
-                                });
+                                })
+                                 .switchIfEmpty(
+                                     Mono.error(
+                                             new CustomRequestException(
+                                                     String.format("ATLAS-901: Could not find project."),
+                                                     HttpStatus.BAD_REQUEST))
+                                 );
                     })
                     .switchIfEmpty(
-                            Mono.defer(() -> {
-                                log.error(String.format(" @method [ Flux<ProjectDTO> findAll(UUID oid, String ovn, String pk, String token) ] -> [ ERROR ATLAS-15: Couldn't find such an organization!  - %s ]", ovn));
-                                return Mono.error(
-                                        new CustomRequestException(
-                                                String.format("ERROR ATLAS-3: Could not find organization! - %s", ovn),
-                                                HttpStatus.BAD_REQUEST)
-                                );
-                            })
+                        Mono.error(
+                            new CustomRequestException(
+                                    String.format("ATLAS-901: Could not find organization."),
+                                    HttpStatus.BAD_REQUEST))
                     );
         } else {
             return Flux.empty();
         }
+    }
+
+    private Flux<ProjectDTO> ifProjectIsPrivate(String pk, Organization organization, Project project) {
+        return getPrincipal() // get user principal from token
+                .flatMapMany( principal -> {
+                    return organizationMemberRepository
+                        .findAllByMemberId(principal.getClaim("uid")) // get user id
+                        .filter(organizationMember -> organizationMember.getOrganizationId().equals(organization.getId()))
+                        .flatMap(org ->  repository.findByOrganizationIdAndKey(org.getOrganizationId(), pk).map(mapper::toDTO))
+                        .switchIfEmpty(
+                            Mono.error(() -> {
+                                log.error(String.format(
+                                    " @method [ Flux<ProjectDTO> findAll(UUID oid, String ovn, String pk, String token) ] ->"   +
+                                    " ATLAS-201: You do not have permission to access this project. ->"                         +
+                                    " @data [ uid = %1$s; project = %2$s ]"                                                     ,
+                                    principal.getClaim("uid")                                                                   ,
+                                    project));
+                                return new CustomRequestException(
+                                    "ATLAS-201: You do not have permission to access this project.",
+                                    HttpStatus.FORBIDDEN);
+                            })
+                        );
+                });
     }
 
     private Mono<Jwt> getPrincipal() {

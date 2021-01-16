@@ -9,17 +9,11 @@ import core.repository.AtlasUserDAO;
 import core.repository.AtlasUserRepository;
 import core.security.Principal;
 import core.service.AtlasUserService;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-
-import java.util.Objects;
 
 @RequiredArgsConstructor
 @Service
@@ -35,24 +29,26 @@ public class AtlasUserServiceImpl implements AtlasUserService {
     @Override
     public Mono<AtlasUserAuthDTO> updateEmailVerification(Mono<AtlasUserAuthDTO> dto) {
         return dto.flatMap(atlasUserAuthDTO -> {
-            log.debug(String.format(" @method [ Mono<AtlasUserAuthDTO> updateEmailVerification(Mono<AtlasUserAuthDTO> dto ] -> @body  %s", atlasUserAuthDTO));
+            log.debug(String.format(
+                    " @method [ Mono<AtlasUserAuthDTO> updateEmailVerification(Mono<AtlasUserAuthDTO> dto ] ->" +
+                    " @body  %s"                                                                                ,
+                    atlasUserAuthDTO));
             return principal.getUID().flatMap(uid -> { // get id from principal
-
                 if (uid.matches(atlasUserAuthDTO.getSub())) { // simple verification
                     return dao.updateEmailVerification(atlasUserAuthDTO.getEmailVerified(), atlasUserAuthDTO.getSub())
                             .then(repository.findBySub(atlasUserAuthDTO.getSub()))
                             .map( found -> {
                                 log.debug(String.format(
-                                                " @method [ Mono<AtlasUserAuthDTO> updateEmailVerification (Mono<AtlasUserAuthDTO> userDTOMono) ] ->" +
-                                                " @body  after dao.updateEmailVerification(user) %s", found));
+                                        " @method [ Mono<AtlasUserAuthDTO> updateEmailVerification (Mono<AtlasUserAuthDTO> userDTOMono) ] ->" +
+                                        " @body  after dao.updateEmailVerification(user) %s"                                                  ,
+                                        found));
                                 return mapperAuth.toDTO(found);
                             });
                 } else {
                     log.error(String.format(
-                            " @method [ Mono<AtlasUserAuthDTO> updateEmailVerification(Mono<AtlasUserAuthDTO> dto ] -> " +
-                            "ATLAS-102: user ids does not match. "                                                       +
-                            "[ Principal: %1$s ], "                                                                      +
-                            "[ atlasUserAuthDTO.getSub(): %2$s ] "                                                       ,
+                            " @method [ Mono<AtlasUserAuthDTO> updateEmailVerification(Mono<AtlasUserAuthDTO> dto ] ->" +
+                            " ATLAS-102: user ids do not match. "                                                       +
+                            " @data [ Principal = %1$s; atlasUserAuthDTO.getSub() = %2$s ]"                                                    ,
                             uid,
                             atlasUserAuthDTO.getSub()
                     ));
@@ -71,7 +67,7 @@ public class AtlasUserServiceImpl implements AtlasUserService {
         if (sub.trim().isEmpty()) {
             return Mono.error(
                     new CustomRequestException(
-                            "ATLAS-100: User id can't be empty.",
+                            "ATLAS-900: sub can't be null or empty.",
                             HttpStatus.BAD_REQUEST)
             );
         }
@@ -79,9 +75,9 @@ public class AtlasUserServiceImpl implements AtlasUserService {
                 .findBySub(sub.trim())
                 .map(mapperAuth::toDTO)
                 .switchIfEmpty(Mono.error(() -> {
-                    log.error(String.format("ATLAS-101: Could not find user by ID - %s", sub));
+                    log.error(String.format("ATLAS-901: Could not find user by ID - %s", sub));
                                 return new CustomRequestException(
-                                    "ATLAS-101: Could not find user.",
+                                    "ATLAS-901: Could not find user.",
                                     HttpStatus.NOT_FOUND);
                         })
                 );
@@ -91,21 +87,21 @@ public class AtlasUserServiceImpl implements AtlasUserService {
         if (sub.trim().isEmpty()) {
             return Mono.error(
                     new CustomRequestException(
-                            "ATLAS-100: User id can't be empty.",
+                            "ATLAS-900: sub can't be empty.",
                             HttpStatus.BAD_REQUEST)
             );
         }
         return repository
-                .findBySub(sub)
+                .findBySub(sub.trim())
                 .map(mapper::toDTO)
                 .switchIfEmpty(
                         Mono.error(() -> {
                             log.error(String.format(
                                     " @method [ Mono<AtlasUserAuthDTO> findAtlasUserById (String sub) ] ->" +
-                                    " ATLAS-101: Could not find user by ID - %s"                            ,
+                                    " ATLAS-901: Could not find user by ID - %s"                            ,
                                     sub));
                             return new CustomRequestException(
-                                    "ATLAS-101: Could not find user.",
+                                    "ATLAS-901: Could not find user.",
                                     HttpStatus.NOT_FOUND);
                         })
                 );
@@ -119,7 +115,6 @@ public class AtlasUserServiceImpl implements AtlasUserService {
                             " @method [ Mono<AtlasUserAuthDTO> create (Mono<AtlasUserAuthDTO> userDTOMono) ] ->" +
                             " @body %s"                                                                          ,
                             dto));
-                    Objects.requireNonNull(dto, "ATLAS-103: User can't be null.");
                     return mapperAuth.toEntity(dto);
                 })
                 .flatMap(user -> dao.create(user)
@@ -133,10 +128,6 @@ public class AtlasUserServiceImpl implements AtlasUserService {
                         }));
     }
 
-
-
-
-
     @Override
     public Mono<AtlasUserDTO> update(Mono<AtlasUserDTO> atlasUserDTOMono) {
         return atlasUserDTOMono
@@ -145,7 +136,6 @@ public class AtlasUserServiceImpl implements AtlasUserService {
                             " @method [ Mono<AtlasUserDTO> update(Mono<AtlasUserDTO> user) ] ->" +
                             " @body  %s"                                                         ,
                             dto));
-                    Objects.requireNonNull(dto, "ATLAS-103: User can't be null.");
                     return mapper.toEntity(dto);
                 })
                 .flatMap(user -> dao.update(user)

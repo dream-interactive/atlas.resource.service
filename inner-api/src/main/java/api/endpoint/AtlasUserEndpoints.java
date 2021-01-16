@@ -4,6 +4,7 @@ package api.endpoint;
 import api.dto.AtlasUserAuthDTO;
 import api.dto.AtlasUserDTO;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,7 +31,7 @@ public interface AtlasUserEndpoints {
 
     @PostMapping
     @ResponseStatus(code = HttpStatus.CREATED)
-    Mono<AtlasUserAuthDTO> create(@RequestBody Mono<AtlasUserAuthDTO> dto);
+    Mono<AtlasUserAuthDTO> create( @RequestBody Mono<AtlasUserAuthDTO> dto);
 
     @PutMapping("/email_verification")
     @ResponseStatus(code = HttpStatus.OK)
