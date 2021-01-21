@@ -31,10 +31,11 @@ import java.util.UUID;
 @Slf4j
 public class ProjectServiceImpl implements ProjectService {
 
-    private final ProjectRoleMemberDAO dao;
     private final ProjectRepository repository;
-    private final ProjectRoleMemberRepository projectRoleMemberRepository;
     private final ProjectMapper mapper;
+
+    private final ProjectRoleMemberRepository projectRoleMemberRepository;
+    private final ProjectRoleMemberDAO projectRoleMemberDAO;
 
     private final OrganizationMemberRepository organizationMemberRepository;
     private final OrganizationRepository organizationRepository;
@@ -48,6 +49,10 @@ public class ProjectServiceImpl implements ProjectService {
                             " @method [ Mono<ProjectDTO> create (Mono<ProjectDTO> projectDTOMono) ] ->" +
                             " @body: "                                                                  +
                             projectDTO );
+
+                    if(projectDTO.getId() != null) {
+                        throw new CustomRequestException("ID should be null", HttpStatus.BAD_REQUEST);
+                    }
                     return mapper.toEntity(projectDTO);
                 })
                 .flatMap(project -> {
@@ -74,7 +79,7 @@ public class ProjectServiceImpl implements ProjectService {
                                                     saved);
                                             Mono<Project> findById = repository.findById(saved.getId());
                                             ProjectMember projectRoleMember = new ProjectMember(saved.getId(), 2, saved.getLeadId());// 2 -> hard code id in table role_in_project
-                                            return dao.create(projectRoleMember)
+                                            return projectRoleMemberDAO.create(projectRoleMember)
                                                     .then(findById) // switch on Mono<Project> findById
                                                     .map(found -> {
                                                         log.debug(
@@ -163,7 +168,7 @@ public class ProjectServiceImpl implements ProjectService {
                             updated);
                     ProjectMember projectRoleMember = new ProjectMember(updated.getId(), 2, updated.getLeadId());// 2 -> hard code id in table role_in_project
 
-                    return dao.reassignLead(projectRoleMember)
+                    return projectRoleMemberDAO.reassignLead(projectRoleMember)
                             .then(repository.findById(updated.getId())) // call Mono<Project> findById
                             .map(found -> {
                                 log.debug(
@@ -239,7 +244,7 @@ public class ProjectServiceImpl implements ProjectService {
                                  .switchIfEmpty(
                                      Mono.error(
                                              new CustomRequestException(
-                                                     String.format("ATLAS-901: Could not find project."),
+                                                     "ATLAS-901: Could not find project.",
                                                      HttpStatus.BAD_REQUEST))
                                  );
                     })
