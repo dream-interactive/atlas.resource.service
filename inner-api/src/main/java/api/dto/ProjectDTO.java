@@ -11,7 +11,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProjectDTO {
-    private UUID id;
+    private UUID idp;
     @NonNull
     private String name;
     @NonNull

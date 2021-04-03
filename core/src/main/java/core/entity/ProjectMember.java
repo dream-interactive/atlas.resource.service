@@ -14,6 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Table("project_role_member")
 public class ProjectMember {
+
     @Column("project_id")
     @NonNull
     private UUID projectId;

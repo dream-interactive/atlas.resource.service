@@ -7,11 +7,10 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
-public abstract class OrganizationMapper {
+public interface OrganizationMapper {
 
-    public abstract OrganizationDTO toDTO (Organization entity);
+  OrganizationDTO toDTO(Organization entity);
 
-    @Mapping(target = "lastModify", ignore = true)
-    public abstract Organization toEntity (OrganizationDTO dto);
-
+  @Mapping(target = "lastModify", ignore = true)
+  Organization toEntity(OrganizationDTO dto);
 }

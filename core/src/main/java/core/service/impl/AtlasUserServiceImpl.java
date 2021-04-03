@@ -5,7 +5,7 @@ import api.dto.AtlasUserDTO;
 import core.exception.CustomRequestException;
 import core.mapper.AtlasUserAuthMapper;
 import core.mapper.AtlasUserMapper;
-import core.repository.AtlasUserDAO;
+import core.dao.AtlasUserDAO;
 import core.repository.AtlasUserRepository;
 import core.security.Principal;
 import core.service.AtlasUserService;

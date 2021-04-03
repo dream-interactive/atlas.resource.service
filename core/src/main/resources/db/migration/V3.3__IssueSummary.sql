@@ -1,0 +1,1 @@
+alter table issue rename column name to summary;

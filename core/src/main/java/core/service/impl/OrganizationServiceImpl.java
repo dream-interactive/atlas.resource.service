@@ -6,7 +6,7 @@ import core.entity.OrganizationMember;
 import core.exception.CustomRequestException;
 import core.mapper.OrganizationMapper;
 import core.repository.OrganizationRepository;
-import core.repository.OrganizationMemberDAO;
+import core.dao.OrganizationMemberDAO;
 import core.repository.OrganizationMemberRepository;
 import core.service.OrganizationService;
 import lombok.AllArgsConstructor;

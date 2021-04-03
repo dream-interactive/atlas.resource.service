@@ -1,16 +1,18 @@
 package core.service.impl;
 
 import api.dto.ProjectDTO;
+import core.entity.IssuesContainer;
 import core.entity.Organization;
 import core.entity.Project;
 import core.entity.ProjectMember;
 import core.exception.CustomRequestException;
 import core.mapper.ProjectMapper;
+import core.repository.IssuesContainerRepository;
 import core.repository.OrganizationMemberRepository;
 import core.repository.OrganizationRepository;
 import core.repository.ProjectRepository;
-import core.repository.ProjectRoleMemberDAO;
-import core.repository.ProjectRoleMemberRepository;
+import core.dao.ProjectRoleMemberDAO;
+import core.repository.ProjectMembersRepository;
 import core.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +26,7 @@ import org.springframework.util.Assert;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 @Service
@@ -34,11 +37,13 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository repository;
     private final ProjectMapper mapper;
 
-    private final ProjectRoleMemberRepository projectRoleMemberRepository;
+    private final ProjectMembersRepository projectRoleMemberRepository;
     private final ProjectRoleMemberDAO projectRoleMemberDAO;
 
     private final OrganizationMemberRepository organizationMemberRepository;
     private final OrganizationRepository organizationRepository;
+
+    private final IssuesContainerRepository icRepository;
 
 
     @Transactional
@@ -50,7 +55,7 @@ public class ProjectServiceImpl implements ProjectService {
                             " @body: "                                                                  +
                             projectDTO );
 
-                    if(projectDTO.getId() != null) {
+                    if(projectDTO.getIdp() != null) {
                         throw new CustomRequestException("ID should be null", HttpStatus.BAD_REQUEST);
                     }
                     return mapper.toEntity(projectDTO);
@@ -64,7 +69,7 @@ public class ProjectServiceImpl implements ProjectService {
                             .findByOrganizationIdAndKey(project.getOrganizationId(), project.getKey())
                             .hasElement()
                             .flatMap(isPresent -> {
-                                if(isPresent && project.getId() == null) { // project with orgId and key exist, and new project should create
+                                if(isPresent && project.getIdp() == null) { // project with orgId and key exist, and new project should create
                                     return Mono.error(
                                             new CustomRequestException(
                                                     "ATLAS-200: Project with this key already exist in your organization.",
@@ -77,9 +82,45 @@ public class ProjectServiceImpl implements ProjectService {
                                                     " @method [ Mono<ProjectDTO> create (Mono<ProjectDTO> projectDTOMono) ] ->" +
                                                     " @body after @call repository.save(project): "                             +
                                                     saved);
-                                            Mono<Project> findById = repository.findById(saved.getId());
-                                            ProjectMember projectRoleMember = new ProjectMember(saved.getId(), 2, saved.getLeadId());// 2 -> hard code id in table role_in_project
-                                            return projectRoleMemberDAO.create(projectRoleMember)
+                                            Mono<Project> findById = repository.findById(saved.getIdp());
+                                            ProjectMember projectRoleMember = new ProjectMember(saved.getIdp(), 2, saved.getLeadId());// 2 -> hard code id in table role_in_project
+
+                                            Mono<Integer> prmId$ = projectRoleMemberDAO.create(projectRoleMember);
+
+                                            IssuesContainer todo = new IssuesContainer(
+                                                    "To Do",
+                                                    project.getIdp(),
+                                                    true,
+                                                    new ArrayList<>(),
+                                                    0
+                                            );
+
+                                            IssuesContainer inWork = new IssuesContainer(
+                                                "In Work",
+                                                    project.getIdp(),
+                                                    true,
+                                                    new ArrayList<>(),
+                                                    1
+                                            );
+                                            IssuesContainer inCheck = new IssuesContainer(
+                                                    "In Check",
+                                                    project.getIdp(),
+                                                    true,
+                                                    new ArrayList<>(),
+                                                    2
+                                            );
+                                            IssuesContainer done = new IssuesContainer(
+                                                    "Done",
+                                                    project.getIdp(),
+                                                    false,
+                                                    new ArrayList<>(),
+                                                    3
+                                            );
+                                            Mono<IssuesContainer> work$ = icRepository.save(inWork);
+                                            Mono<IssuesContainer> todo$ = icRepository.save(todo);
+                                            Mono<IssuesContainer> done$ = icRepository.save(done);
+
+                                            return Mono.zip(prmId$, work$, todo$, done$)
                                                     .then(findById) // switch on Mono<Project> findById
                                                     .map(found -> {
                                                         log.debug(
@@ -110,7 +151,7 @@ public class ProjectServiceImpl implements ProjectService {
                 })
                 .flatMap(project -> {
                     return repository
-                            .findById(project.getId())
+                            .findById(project.getIdp())
                             .flatMap(result -> {
                                 if (result.getLeadId().equals(project.getLeadId())) { // check if lead changed
                                     return updateIfLeadDoesntChanged(project);
@@ -139,7 +180,7 @@ public class ProjectServiceImpl implements ProjectService {
                             " @method [ Mono<ProjectDTO> updateIfLeadDoesntChanged (Project incomingProject) ] ->" +
                             " @body after @call repository.save(incomingProject): "                                +
                             saved);
-                    Mono<Project> findById = repository.findById(saved.getId());
+                    Mono<Project> findById = repository.findById(saved.getIdp());
                     return findById
                             .map(found -> {
                                 log.debug(
@@ -166,10 +207,10 @@ public class ProjectServiceImpl implements ProjectService {
                             " @method [ Mono<ProjectDTO> updateIfLeadChanged (Project incomingProject) ] ->" +
                             " @body after @call repository.save(incomingProject): "                          +
                             updated);
-                    ProjectMember projectRoleMember = new ProjectMember(updated.getId(), 2, updated.getLeadId());// 2 -> hard code id in table role_in_project
+                    ProjectMember projectRoleMember = new ProjectMember(updated.getIdp(), 2, updated.getLeadId());// 2 -> hard code id in table role_in_project
 
                     return projectRoleMemberDAO.reassignLead(projectRoleMember)
-                            .then(repository.findById(updated.getId())) // call Mono<Project> findById
+                            .then(repository.findById(updated.getIdp())) // call Mono<Project> findById
                             .map(found -> {
                                 log.debug(
                                         " @method [ Mono<ProjectDTO> updateIfLeadChanged (Project incomingProject) ] ->" +
@@ -251,7 +292,7 @@ public class ProjectServiceImpl implements ProjectService {
                     .switchIfEmpty(
                         Mono.error(
                             new CustomRequestException(
-                                    String.format("ATLAS-901: Could not find organization."),
+                                    "ATLAS-901: Could not find organization.",
                                     HttpStatus.BAD_REQUEST))
                     );
         } else {

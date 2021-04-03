@@ -19,7 +19,7 @@ public class Project {
 
     @Id
     @Column("project_id")
-    private UUID id;
+    private UUID idp;
     @NonNull
     private String name;
     @NonNull

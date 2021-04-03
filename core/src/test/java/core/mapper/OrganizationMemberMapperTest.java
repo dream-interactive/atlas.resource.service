@@ -1,11 +1,7 @@
 package core.mapper;
 
-import api.dto.OrganizationDTO;
 import api.dto.OrganizationMemberDTO;
-import core.controller.OrganizationMemberController;
-import core.entity.Organization;
 import core.entity.OrganizationMember;
-import core.exception.CustomExceptionHandler;
 import core.exception.CustomRequestException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

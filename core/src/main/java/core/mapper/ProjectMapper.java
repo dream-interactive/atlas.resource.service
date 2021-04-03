@@ -12,14 +12,14 @@ import org.springframework.http.HttpStatus;
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface ProjectMapper {
 
-    @Mapping(source = "typeId", target = "type", qualifiedByName = "typeIdToType")
+    @Mapping(source = "typeId", target = "type"/*, qualifiedByName = "typeIdToType"*/)
     ProjectDTO toDTO (Project entity);
 
     @Mapping(target = "lastModify", ignore = true)
-    @Mapping(source = "type", target = "typeId", qualifiedByName = "typeToTypeId")
+    @Mapping(source = "type", target = "typeId"/*, qualifiedByName = "typeToTypeId"*/)
     Project toEntity (ProjectDTO dto);
 
-    @Named("typeToTypeId")
+   /* @Named("typeToTypeId")
     default Integer typeToTypeId (String type) {
         switch (type) {
             case "SCRUM": return 1;
@@ -35,6 +35,6 @@ public interface ProjectMapper {
             case 2: return "KANBAN";
             default: throw new CustomRequestException(String.format("ERROR ATLAS-5: Invalid project typeId - %d", typeId), HttpStatus.NOT_FOUND);
         }
-    }
+    }*/
 
 }

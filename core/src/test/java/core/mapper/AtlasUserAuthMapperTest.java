@@ -1,3 +1,4 @@
+/*
 package core.mapper;
 
 import api.dto.AtlasUserAuthDTO;
@@ -66,3 +67,4 @@ class AtlasUserAuthMapperTest {
 
 
 }
+*/
