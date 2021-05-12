@@ -31,6 +31,8 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import static reactor.core.publisher.Flux.zip;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -245,18 +247,23 @@ public class ProjectServiceImpl implements ProjectService {
                             " @method [ Flux<ProjectDTO> findByUserId(String userId) ] ->"                                                       +
                             " @call flatMap for each element after @call projectRoleMemberRepository.findAllByMemberId(userId);  element: [ %s ]",
                             prm));
-                    return repository.findById(prm.getIdp()).map( project -> {
-                        log.debug(String.format(
-                                " @method [ Flux<ProjectDTO> findByUserId(String userId) ] ->"                      +
-                                " @body after @call repository.findById(prm.getProjectId()) for each element %s"    ,
-                                project ));
+                    return
+                        repository
+                        .findById(prm.getIdp())
+                        .map( project -> {
+                          log.debug(String.format(
+                                  " @method [ Flux<ProjectDTO> findByUserId(String userId) ] ->"                      +
+                                  " @body after @call repository.findById(prm.getProjectId()) for each element %s"    ,
+                                  project ));
                         return mapper.toDTO(project);
-                    }).flatMap(dto -> {
-                      return taskDAO.findLabelsByIdp(dto.getIdp()).collectList().map(labels -> { // set labels
-                        dto.setLabels(labels);
-                        return dto;
-                      });
-                    });
+                        }).flatMap(dto ->
+                            taskDAO
+                                .findLabelsByIdp(dto.getIdp())
+                                .collectList()
+                                .map(labels -> { // set labels
+                                      dto.setLabels(labels);
+                                      return dto;
+                                }));
                 });
     }
     /**

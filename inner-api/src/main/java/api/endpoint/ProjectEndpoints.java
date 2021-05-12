@@ -47,7 +47,6 @@ public interface ProjectEndpoints {
      * @param oid - organization id
      * @param ovn - organization valid name
      * @param pk - project key
-     * @param user - Okta Security,  it will be resolved by the framework
      */
     @GetMapping
     @ResponseStatus(code = HttpStatus.OK)

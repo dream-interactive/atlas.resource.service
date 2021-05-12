@@ -34,7 +34,7 @@ public class Project {
      * 2 - KANBAN
      */
     @Column("project_type_id")
-    private Integer typeId;
+    private Integer type;
 
     @Column("lead_user_id")
     private String leadId;

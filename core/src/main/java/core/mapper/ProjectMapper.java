@@ -12,12 +12,12 @@ import org.springframework.http.HttpStatus;
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface ProjectMapper {
 
-    @Mapping(source = "typeId", target = "type"/*, qualifiedByName = "typeIdToType"*/)
+  //  @Mapping(source = "typeId", target = "type"/*, qualifiedByName = "typeIdToType"*/)
     @Mapping(target = "labels", ignore = true)
     ProjectDTO toDTO (Project entity);
 
     @Mapping(target = "lastModify", ignore = true)
-    @Mapping(source = "type", target = "typeId"/*, qualifiedByName = "typeToTypeId"*/)
+ //   @Mapping(source = "type", target = "typeId"/*, qualifiedByName = "typeToTypeId"*/)
     Project toEntity (ProjectDTO dto);
 
    /* @Named("typeToTypeId")

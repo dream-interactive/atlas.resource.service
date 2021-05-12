@@ -20,7 +20,7 @@ public class ProjectDTO {
     @NonNull
     private UUID organizationId;
     @NonNull
-    private String type;
+    private Integer type;
     @NonNull
     private String leadId;
 
