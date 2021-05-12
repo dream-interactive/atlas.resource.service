@@ -23,7 +23,7 @@ public class TasksContainerEndpointsImpl implements TasksContainerEndpoints {
 
     @Override
     public Mono<TasksContainerDTO> update(Mono<TasksContainerDTO> dto) {
-        return null;
+        return service.update(dto);
     }
 
     @Override

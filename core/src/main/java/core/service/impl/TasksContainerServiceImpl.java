@@ -57,8 +57,30 @@ public class TasksContainerServiceImpl implements TasksContainerService {
     }
 
     @Override
-    public Mono<TasksContainerDTO> update(Mono<TasksContainerDTO> dto) {
-        return null;
+    public Mono<TasksContainerDTO> update(Mono<TasksContainerDTO> monoDTO) {
+      return principal.getUID()
+          .flatMap(uid -> {
+            log.debug(String.format(
+                " @method [ Mono<TasksContainerDTO> update(Mono<TasksContainerDTO> monoDTO) ] ->" +
+                    " @user [ sub = %1$s ]", uid));
+            return monoDTO
+                .map(dto -> {
+                  log.debug(String.format(
+                      " @method [ Mono<TasksContainerDTO> update(Mono<TasksContainerDTO> monoDTO) ] ->" +
+                          " @body [ dto = %1$s ]", dto));
+                  TasksContainer tasksContainer = mapper.toEntity(dto, taskMapper);
+                  log.debug(String.format(
+                      " @method [ Mono<TasksContainerDTO> update(Mono<TasksContainerDTO> monoDTO) ] ->" +
+                          " @body after mapper [ tasksContainer = %1$s ]", tasksContainer));
+                  return tasksContainer;
+                })
+                .flatMap(tc -> repository.save(tc).map(tasksContainer -> {
+                  log.debug(String.format(
+                      " @method [ Mono<TasksContainerDTO> update(Mono<TasksContainerDTO> monoDTO) ] ->" +
+                          " @body after saving [ tasksContainer = %1$s ]", tasksContainer));
+                  return mapper.toDTO(tasksContainer, taskMapper);
+                }));
+          });
     }
 
     @Override
