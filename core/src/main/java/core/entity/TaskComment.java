@@ -12,8 +12,8 @@ import org.springframework.lang.NonNull;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table("issue_comments")
-public class IssueComment {
+@Table("task_comments")
+public class TaskComment {
   @Id
   private Long idc;
   @NonNull

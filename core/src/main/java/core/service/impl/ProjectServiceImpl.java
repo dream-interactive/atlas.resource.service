@@ -108,19 +108,12 @@ public class ProjectServiceImpl implements ProjectService {
                                                     new ArrayList<>(),
                                                     1
                                             );
-                                            TasksContainer inCheck = new TasksContainer(
-                                                    "In Check",
-                                                    project.getIdp(),
-                                                    true,
-                                                    new ArrayList<>(),
-                                                    2
-                                            );
                                             TasksContainer done = new TasksContainer(
                                                     "Done",
                                                     project.getIdp(),
                                                     false,
                                                     new ArrayList<>(),
-                                                    3
+                                                    2
                                             );
                                             Mono<TasksContainer> work$ = icRepository.save(inWork);
                                             Mono<TasksContainer> todo$ = icRepository.save(todo);

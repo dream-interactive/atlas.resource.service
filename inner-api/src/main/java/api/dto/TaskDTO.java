@@ -44,9 +44,9 @@ public class TaskDTO {
     private String priority; // 'Low', 'Medium', 'High'
     private String description; // Json
     private Byte points;
-    private List<Long> closeBeforeIssuesIds;
-    private List<Long> closeAfterIssuesIds;
-    private List<Long> closeWithIssuesIds;
+    private List<Long> closeBeforeTasksIds;
+    private List<Long> closeAfterTasksIds;
+    private List<Long> closeWithTasksIds;
     private List<String> labels;
     @NonNull
     private LocalDateTime dateTimeS; // dateTime start

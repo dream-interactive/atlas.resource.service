@@ -34,7 +34,7 @@ public class Task {
     /*
      * Insert should be run from backend in loop with try / catch ( DataBase error - value exist)
 
-     *   select MAX(key_number) into keyN from issue where key = new.key;
+     *   select MAX(key_number) into keyN from task where key = new.key;
      *   new.key_number := keyN + 1;
      *   return new;
      * */
@@ -52,12 +52,12 @@ public class Task {
     private String priority; // 'Low', 'Medium', 'High'
     private String description; // html
     private Byte points;
-    @Column("close_before_issues")
-    private List<Long> closeBeforeIssuesIds;
-    @Column("close_after_issues")
-    private List<Long> closeAfterIssuesIds;
-    @Column("close_with_issues")
-    private List<Long> closeWithIssuesIds;
+    @Column("close_before_tasks")
+    private List<Long> closeBeforeTasksIds;
+    @Column("close_after_tasks")
+    private List<Long> closeAfterTasksIds;
+    @Column("close_with_tasks")
+    private List<Long> closeWithTasksIds;
     private List<String> labels;
     @NonNull
     @Column("date_time_s")

@@ -1,20 +1,13 @@
 package core.dao.impl;
 
 import core.dao.TaskDAO;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
-
-import static reactor.core.publisher.Flux.just;
 
 /** @author Maksym Sevriukov. Date: 14.04.2021 */
 @Repository

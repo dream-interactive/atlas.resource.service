@@ -86,7 +86,7 @@ insert into project_type (pt_id, type) values (2, 'KANBAN');
 
 create table if not exists project
 (
-    project_id UUID default gen_random_uuid() unique not null,
+    project_id UUID default gen_random_uuid() unique not null primary key ,
     name  varchar(100)  not null,
     key  varchar(5)  not null,
     project_type_id  int  not null,
@@ -96,7 +96,7 @@ create table if not exists project
     img text not null default '../../../assets/images/icon-business-pack/svg/101-laptop.svg',
     last_modify timestamp with time zone default current_timestamp,
 
-    constraint project_pkey primary key (organization_id, key),
+    constraint UC_project_orgAndKey unique (organization_id, key),
 
     constraint fk_project_pt_id
         foreign key (project_type_id)

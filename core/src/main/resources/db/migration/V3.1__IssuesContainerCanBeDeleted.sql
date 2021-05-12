@@ -1,1 +1,0 @@
-alter table issues_container add column can_be_deleted boolean default true;

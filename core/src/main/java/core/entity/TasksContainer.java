@@ -16,7 +16,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table("issues_container")
+@Table("tasks_container")
 public class TasksContainer {
     @Id
     @Column("idic") // todo rename to idtc
