@@ -9,7 +9,6 @@ import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.lang.NonNull;
-import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,9 +17,10 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table("issues_container")
-public class IssuesContainer {
+public class TasksContainer {
     @Id
-    private Long idic;
+    @Column("idic") // todo rename to idtc
+    private Long idtc;
     @NonNull
     private String name;
     @NonNull
@@ -30,17 +30,17 @@ public class IssuesContainer {
     private Boolean canBeDeleted;
 
     @Transient
-    private List<Issue> issues;
+    private List<Task> tasks;
 
     // used for saving order place
     @Column("index_number")
     private Integer indexNumber;
 
-    public IssuesContainer(@NonNull String name, @NonNull UUID idp, Boolean canBeDeleted, List<Issue> issues, Integer indexNumber) {
+    public TasksContainer(@NonNull String name, @NonNull UUID idp, Boolean canBeDeleted, List<Task> tasks, Integer indexNumber) {
         this.name = name;
         this.idp = idp;
         this.canBeDeleted = canBeDeleted;
-        this.issues = issues;
+        this.tasks = tasks;
         this.indexNumber = indexNumber;
     }
 }

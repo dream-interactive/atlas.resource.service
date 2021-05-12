@@ -4,11 +4,6 @@ cors:
   domain:
     uri: http://localhost:4200
 
-# auth0:
-  # Replace with the API Identifier for your Auth0 API.
-#  audience: https://atlas.com
-
-
 #okta:
 #  oauth2:
 #    issuer: https://{yourOktaDomain}/oauth2/default

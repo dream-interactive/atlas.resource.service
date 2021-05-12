@@ -1,6 +1,7 @@
 package core.endpoint;
 
 import api.dto.AtlasUserDTO;
+import api.dto.ProjectMemberDTO;
 import api.endpoint.ProjectMembersEndpoints;
 import core.service.ProjectMembersService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ public class ProjectMembersEndpointsImpl implements ProjectMembersEndpoints {
   private final ProjectMembersService service;
 
   @Override
-  public Flux<AtlasUserDTO> findAllByProjectId(UUID idp) {
-    return null;
+  public Flux<ProjectMemberDTO> findAllByProjectId(UUID idp) {
+    return service.findAllByProjectId(idp);
   }
 }

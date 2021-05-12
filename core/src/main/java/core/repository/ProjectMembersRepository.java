@@ -14,7 +14,7 @@ import java.util.UUID;
 @Repository
 public interface ProjectMembersRepository extends R2dbcRepository<ProjectMember, UUID> {
 
-  Flux<ProjectMember> findAllByMemberId(String id);
+  Flux<ProjectMember> findAllBySub(String id);
 
-  Flux<ProjectMember> findAllByProjectId(UUID idp);
+  Flux<ProjectMember> findAllByIdp(UUID idp);
 }

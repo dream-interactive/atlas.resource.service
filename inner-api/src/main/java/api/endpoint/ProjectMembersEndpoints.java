@@ -1,6 +1,7 @@
 package api.endpoint;
 
 import api.dto.AtlasUserDTO;
+import api.dto.ProjectMemberDTO;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,5 +23,5 @@ public interface ProjectMembersEndpoints {
 
     @GetMapping("/{idp}/members")
     @ResponseStatus(OK)
-    Flux<AtlasUserDTO> findAllByProjectId(@PathVariable("idp") UUID idp);
+    Flux<ProjectMemberDTO> findAllByProjectId(@PathVariable("idp") UUID idp);
 }

@@ -1,7 +1,6 @@
 package core.service;
 
-import api.dto.AtlasUserDTO;
-import org.springframework.web.bind.annotation.PathVariable;
+import api.dto.ProjectMemberDTO;
 import reactor.core.publisher.Flux;
 
 import java.util.UUID;
@@ -12,6 +11,6 @@ import java.util.UUID;
  */
 
 public interface ProjectMembersService {
-    Flux<AtlasUserDTO> findAllByProjectId(UUID idp);
+    Flux<ProjectMemberDTO> findAllByProjectId(UUID idp);
 
 }

@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -22,8 +23,11 @@ public class ProjectDTO {
     private String type;
     @NonNull
     private String leadId;
+
     private String img;
     @NonNull
     private Boolean isPrivate;
+
+    private List<String> labels;
 
 }

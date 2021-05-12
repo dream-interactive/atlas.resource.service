@@ -1,13 +1,15 @@
 package core.service.impl;
 
 import api.dto.ProjectDTO;
-import core.entity.IssuesContainer;
+import core.dao.TaskDAO;
+import core.entity.TasksContainer;
 import core.entity.Organization;
 import core.entity.Project;
 import core.entity.ProjectMember;
 import core.exception.CustomRequestException;
 import core.mapper.ProjectMapper;
-import core.repository.IssuesContainerRepository;
+import core.repository.TaskRepository;
+import core.repository.TasksContainerRepository;
 import core.repository.OrganizationMemberRepository;
 import core.repository.OrganizationRepository;
 import core.repository.ProjectRepository;
@@ -43,7 +45,9 @@ public class ProjectServiceImpl implements ProjectService {
     private final OrganizationMemberRepository organizationMemberRepository;
     private final OrganizationRepository organizationRepository;
 
-    private final IssuesContainerRepository icRepository;
+    private final TasksContainerRepository icRepository;
+    private final TaskRepository taskRepository;
+    private final TaskDAO taskDAO;
 
 
     @Transactional
@@ -87,7 +91,7 @@ public class ProjectServiceImpl implements ProjectService {
 
                                             Mono<Integer> prmId$ = projectRoleMemberDAO.create(projectRoleMember);
 
-                                            IssuesContainer todo = new IssuesContainer(
+                                            TasksContainer todo = new TasksContainer(
                                                     "To Do",
                                                     project.getIdp(),
                                                     true,
@@ -95,30 +99,30 @@ public class ProjectServiceImpl implements ProjectService {
                                                     0
                                             );
 
-                                            IssuesContainer inWork = new IssuesContainer(
+                                            TasksContainer inWork = new TasksContainer(
                                                 "In Work",
                                                     project.getIdp(),
                                                     true,
                                                     new ArrayList<>(),
                                                     1
                                             );
-                                            IssuesContainer inCheck = new IssuesContainer(
+                                            TasksContainer inCheck = new TasksContainer(
                                                     "In Check",
                                                     project.getIdp(),
                                                     true,
                                                     new ArrayList<>(),
                                                     2
                                             );
-                                            IssuesContainer done = new IssuesContainer(
+                                            TasksContainer done = new TasksContainer(
                                                     "Done",
                                                     project.getIdp(),
                                                     false,
                                                     new ArrayList<>(),
                                                     3
                                             );
-                                            Mono<IssuesContainer> work$ = icRepository.save(inWork);
-                                            Mono<IssuesContainer> todo$ = icRepository.save(todo);
-                                            Mono<IssuesContainer> done$ = icRepository.save(done);
+                                            Mono<TasksContainer> work$ = icRepository.save(inWork);
+                                            Mono<TasksContainer> todo$ = icRepository.save(todo);
+                                            Mono<TasksContainer> done$ = icRepository.save(done);
 
                                             return Mono.zip(prmId$, work$, todo$, done$)
                                                     .then(findById) // switch on Mono<Project> findById
@@ -235,18 +239,23 @@ public class ProjectServiceImpl implements ProjectService {
         }
 
         return projectRoleMemberRepository
-                .findAllByMemberId(userId)
+                .findAllBySub(userId)
                 .flatMap(prm -> {
                     log.debug(String.format(
                             " @method [ Flux<ProjectDTO> findByUserId(String userId) ] ->"                                                       +
                             " @call flatMap for each element after @call projectRoleMemberRepository.findAllByMemberId(userId);  element: [ %s ]",
                             prm));
-                    return repository.findById(prm.getProjectId()).map( project -> {
+                    return repository.findById(prm.getIdp()).map( project -> {
                         log.debug(String.format(
                                 " @method [ Flux<ProjectDTO> findByUserId(String userId) ] ->"                      +
                                 " @body after @call repository.findById(prm.getProjectId()) for each element %s"    ,
                                 project ));
                         return mapper.toDTO(project);
+                    }).flatMap(dto -> {
+                      return taskDAO.findLabelsByIdp(dto.getIdp()).collectList().map(labels -> { // set labels
+                        dto.setLabels(labels);
+                        return dto;
+                      });
                     });
                 });
     }
@@ -272,35 +281,43 @@ public class ProjectServiceImpl implements ProjectService {
                 );
             }
 
-            return organizationRepository.findByValidName(ovn) // find organization
-                    .flatMapMany(organization -> {
-                         return repository.findByOrganizationIdAndKey(organization.getId(), pk) // find project
-                                 .flatMapMany(project -> {
-                                    if (project.getIsPrivate()) { // if project is private check that user have permissions to access
-                                        return ifProjectIsPrivate(pk, organization, project);
-                                    } else {
-                                        return Flux.just(project).map(mapper::toDTO);
-                                    }
-                                })
-                                 .switchIfEmpty(
-                                     Mono.error(
-                                             new CustomRequestException(
-                                                     "ATLAS-901: Could not find project.",
-                                                     HttpStatus.BAD_REQUEST))
-                                 );
-                    })
-                    .switchIfEmpty(
-                        Mono.error(
-                            new CustomRequestException(
-                                    "ATLAS-901: Could not find organization.",
-                                    HttpStatus.BAD_REQUEST))
-                    );
+          return getProjectByOvnAndPK(ovn, pk);
         } else {
             return Flux.empty();
         }
     }
 
-    private Flux<ProjectDTO> ifProjectIsPrivate(String pk, Organization organization, Project project) {
+  private Flux<ProjectDTO> getProjectByOvnAndPK(String ovn, String pk) {
+    return organizationRepository.findByValidName(ovn) // find organization
+            .flatMapMany(organization -> {
+                 return repository.findByOrganizationIdAndKey(organization.getId(), pk) // find project
+                         .flatMapMany(project -> {
+                            if (project.getIsPrivate()) { // if project is private check that user have permissions to access
+                                return ifProjectIsPrivate(pk, organization, project);
+                            } else {
+                                return Flux.just(project).map(mapper::toDTO);
+                            }
+                         })
+                         .flatMap(dto -> taskDAO.findLabelsByIdp(dto.getIdp()).collectList().map(labels -> {
+                           dto.setLabels(labels);
+                           return dto;
+                         }))
+                         .switchIfEmpty(
+                             Mono.error(
+                                     new CustomRequestException(
+                                             "ATLAS-901: Could not find project.",
+                                             HttpStatus.BAD_REQUEST))
+                         );
+            })
+            .switchIfEmpty(
+                Mono.error(
+                    new CustomRequestException(
+                            "ATLAS-901: Could not find organization.",
+                            HttpStatus.BAD_REQUEST))
+            );
+  }
+
+  private Flux<ProjectDTO> ifProjectIsPrivate(String pk, Organization organization, Project project) {
         return getPrincipal() // get user principal from token
                 .flatMapMany( principal -> {
                     return organizationMemberRepository
@@ -330,4 +347,5 @@ public class ProjectServiceImpl implements ProjectService {
                     return (Jwt) authentication.getPrincipal();
                 });
     }
+
 }

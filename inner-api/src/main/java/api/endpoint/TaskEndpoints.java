@@ -1,6 +1,7 @@
 package api.endpoint;
 
-import api.dto.IssuesContainerDTO;
+import api.dto.TaskDTO;
+import api.dto.TaskDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,27 +22,31 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
  * Represents the endpoints for IssuesContainer.
  * This interface follows reactive and functionality paradigms.
  *
- * @author Maksym Sevriukov
+ * @author Maksym Sevriukov.
+ * Date: 18.04.2021
  * @see reactor.core.publisher.Flux
  * @see reactor.core.publisher.Mono
  */
-@RequestMapping(value = "api/issues-containers", produces = APPLICATION_JSON_VALUE)
-public interface IssuesContainerEndpoints {
-    @PostMapping
-    @ResponseStatus(code = HttpStatus.CREATED)
-    Mono<IssuesContainerDTO> create(@RequestBody Mono<IssuesContainerDTO> dto);
+@RequestMapping(value = "api/tasks", produces = APPLICATION_JSON_VALUE)
+public interface TaskEndpoints {
 
-    @PutMapping
-    @ResponseStatus(code = HttpStatus.OK)
-    Mono<IssuesContainerDTO> update(@RequestBody Mono<IssuesContainerDTO> dto);
+  @PostMapping
+  @ResponseStatus(code = HttpStatus.CREATED)
+  Mono<TaskDTO> create(@RequestBody Mono<TaskDTO> dto);
 
-    @GetMapping("/{idic}")
-    Mono<IssuesContainerDTO> findOneById(@PathVariable Long idic);
+  @PutMapping
+  @ResponseStatus(code = HttpStatus.OK)
+  Mono<TaskDTO> update(@RequestBody Mono<TaskDTO> dto);
 
-    @GetMapping("/projects/{idp}")
-    Flux<IssuesContainerDTO> findAllByProjectId(@PathVariable UUID idp);
+  @GetMapping("/{idt}")
+  Mono<TaskDTO> findOneByIdt(@PathVariable Long idt);
 
-    @DeleteMapping("/{idic}")
-    @ResponseStatus(code = HttpStatus.NO_CONTENT)
-    Mono<Void> delete(@PathVariable Long idic);
+  @GetMapping("/containers/{idtc}")
+  Flux<TaskDTO> findAllByTasksContainerId(@PathVariable Long idtc);
+
+  @DeleteMapping("/{idt}")
+  @ResponseStatus(code = HttpStatus.NO_CONTENT)
+  Mono<Void> delete(@PathVariable Long idt);
+
+
 }

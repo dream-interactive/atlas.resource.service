@@ -1,6 +1,6 @@
 package core.repository;
 
-import core.entity.IssuesContainer;
+import core.entity.TasksContainer;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 
 /**
@@ -8,5 +8,5 @@ import org.springframework.data.repository.reactive.ReactiveCrudRepository;
  * Date: 19.03.2021
  */
 
-public interface IssueCommentsRepository extends ReactiveCrudRepository<IssuesContainer, Long> {
+public interface IssueCommentsRepository extends ReactiveCrudRepository<TasksContainer, Long> {
 }

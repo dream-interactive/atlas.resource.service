@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 public interface ProjectMapper {
 
     @Mapping(source = "typeId", target = "type"/*, qualifiedByName = "typeIdToType"*/)
+    @Mapping(target = "labels", ignore = true)
     ProjectDTO toDTO (Project entity);
 
     @Mapping(target = "lastModify", ignore = true)

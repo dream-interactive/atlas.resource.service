@@ -4,24 +4,26 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-import java.util.UUID;
+/**
+ * @author Maksym Sevriukov.
+ * Date: 15.04.2021
+ */
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table("project_role_member")
-public class ProjectMember {
+@Table("role_in_project")
+public class ProjectRole {
 
-    @Column("project_id")
-    @NonNull
-    private UUID idp;
-    @Column("role_id")
-    @NonNull
-    private Integer roleId;
-    @Column("member_id")
-    @NonNull
-    private String sub;
+  @Id
+  @Column("id")
+  private Integer idpr;
+
+  @Column("role")
+  @NonNull
+  private String role;
 }
