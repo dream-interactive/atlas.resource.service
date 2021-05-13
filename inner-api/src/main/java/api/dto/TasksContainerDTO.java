@@ -12,7 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class TasksContainerDTO {
   private Long idtc;
-  private String summary;
+  private String name;
   private UUID idp;
   /**
    * Not updatable field in DB, only Container 'DONE' has value as "false".

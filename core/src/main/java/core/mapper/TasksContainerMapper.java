@@ -17,11 +17,9 @@ import java.util.stream.Collectors;
 public abstract class TasksContainerMapper {
 
     @Mapping(source = "tasks", target = "tasks", qualifiedByName = "toTasks")
-    @Mapping(source = "summary", target = "name")
     public abstract TasksContainer toEntity(TasksContainerDTO dto, @Context TaskMapper taskMapper);
 
     @Mapping(source = "tasks", target = "tasks", qualifiedByName = "toTasksDTO")
-    @Mapping(source = "name", target = "summary")
     public abstract TasksContainerDTO toDTO(TasksContainer entity, @Context TaskMapper taskMapper);
 
     @Named("toTasksDTO")

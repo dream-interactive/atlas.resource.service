@@ -79,6 +79,23 @@ begin
 end;
 $history$ LANGUAGE plpgsql;
 
+create function task_creating() returns trigger
+as
+$history$
+declare
+    i int;
+begin
+    select max(key_number) into i from task where project_id = new.project_id;
+
+    if i is NULL then
+        new.key_number:= 0;
+    else
+        new.key_number:= i+1;
+    end if;
+    return new;
+end;
+$history$ LANGUAGE plpgsql;
+
 
 create table task
 (
@@ -136,6 +153,13 @@ create trigger task_history
     before update
     on task
 execute procedure history('task_history');
+
+create trigger task_creating
+    before insert
+    on task for each row
+execute procedure task_creating();
+
+
 
 /* see task table */
 create table if not exists tasks_archive

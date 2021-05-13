@@ -8,6 +8,7 @@ import core.security.Principal;
 import core.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -46,7 +47,8 @@ public class TaskServiceImpl implements TaskService {
                                 " @method [ Mono<TaskDTO> create(Mono<TaskDTO> dto) ] ->" +
                                 " @body after saving [ task = %1$s ]", t));
                             return mapper.toDTO(t);
-                        }));
+                        })
+                    );
             });
     }
 
