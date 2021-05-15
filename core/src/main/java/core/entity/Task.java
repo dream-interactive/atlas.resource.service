@@ -53,11 +53,11 @@ public class Task {
     private String description; // html
     private Byte points;
     @Column("close_before_tasks")
-    private List<Long> closeBeforeTasksIds;
+    private List<Long> closeBeforeTasks;
     @Column("close_after_tasks")
-    private List<Long> closeAfterTasksIds;
+    private List<Long> closeAfterTasks;
     @Column("close_with_tasks")
-    private List<Long> closeWithTasksIds;
+    private List<Long> closeWithTasks;
     private List<String> labels;
     @NonNull
     @Column("date_time_s")

@@ -1,12 +1,11 @@
-
 create table if not exists tasks_container
 (
-    idic         bigserial unique not null,
-    name         varchar(50)      not null,
-    idp          uuid             not null,
+    idic           bigserial unique not null,
+    name           varchar(50)      not null,
+    idp            uuid             not null,
 
-    index_number int              not null, /* for saving order place */
-    can_be_deleted     boolean                   default true,
+    index_number   int              not null, /* for saving order place */
+    can_be_deleted boolean default true,
 
     constraint tasks_container_pkey primary key (idic),
 
@@ -88,9 +87,9 @@ begin
     select max(key_number) into i from task where project_id = new.project_id;
 
     if i is NULL then
-        new.key_number:= 0;
+        new.key_number := 0;
     else
-        new.key_number:= i+1;
+        new.key_number := i + 1;
     end if;
     return new;
 end;
@@ -111,10 +110,10 @@ create table task
     priority           varchar          not null default 'Medium',
     description        text,
     points             smallint,
-    close_before_tasks bigint[],
-    close_after_tasks  bigint[],
-    close_with_tasks   bigint[],
-    labels             varchar[],
+    close_before_tasks bigint[]         not null default array[]::bigint[],
+    close_after_tasks  bigint[]         not null default array[]::bigint[],
+    close_with_tasks   bigint[]         not null default array[]::bigint[],
+    labels             varchar[]        not null default array[]::varchar[],
     date_time_s        timestamp        not null default current_timestamp, /* start date */
     date_time_e        timestamp, /* end date */
     last_modify        timestamp,
@@ -156,9 +155,9 @@ execute procedure history('task_history');
 
 create trigger task_creating
     before insert
-    on task for each row
+    on task
+    for each row
 execute procedure task_creating();
-
 
 
 /* see task table */
@@ -176,10 +175,10 @@ create table if not exists tasks_archive
     priority               varchar       not null default 'Medium',
     description            text,
     points                 smallint,
-    close_before_tasks     bigint[],
-    close_after_tasks      bigint[],
-    close_with_tasks       bigint[],
-    labels                 varchar[],
+    close_before_tasks     bigint[]      not null default array[]::bigint[],
+    close_after_tasks      bigint[]      not null default array[]::bigint[],
+    close_with_tasks       bigint[]      not null default array[]::bigint[],
+    labels                 varchar[]     not null default array[]::varchar[],
     date_time_s            timestamp     not null default current_timestamp,
     date_time_assumption_e timestamp, /* assumption end date*/
     date_time_e            timestamp,
