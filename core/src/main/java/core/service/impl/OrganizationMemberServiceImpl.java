@@ -3,7 +3,7 @@ package core.service.impl;
 import api.dto.OrganizationMemberDTO;
 import core.exception.CustomRequestException;
 import core.mapper.OrganizationMemberMapper;
-import core.repository.OrganizationMemberDAO;
+import core.dao.OrganizationMemberDAO;
 import core.repository.OrganizationMemberRepository;
 import core.repository.OrganizationRepository;
 import core.service.OrganizationMemberService;

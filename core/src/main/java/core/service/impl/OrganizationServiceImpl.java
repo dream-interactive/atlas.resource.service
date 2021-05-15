@@ -6,7 +6,7 @@ import core.entity.OrganizationMember;
 import core.exception.CustomRequestException;
 import core.mapper.OrganizationMapper;
 import core.repository.OrganizationRepository;
-import core.repository.OrganizationMemberDAO;
+import core.dao.OrganizationMemberDAO;
 import core.repository.OrganizationMemberRepository;
 import core.service.OrganizationService;
 import lombok.AllArgsConstructor;
@@ -157,8 +157,10 @@ public class OrganizationServiceImpl implements OrganizationService {
                 });
     }
 
-    public Mono<Boolean> existByValidName(String validName) {
-        return repository.findByValidName(validName).hasElement();
+    @Override
+    public Mono<OrganizationDTO> findByValidName(String validName) {
+        log.debug(String.format(" @method [ Mono<OrganizationDTO> findByValidName(String validName) ] -> @param: %s", validName));
+        return repository.findByValidName(validName).map(mapper::toDTO);
     }
 
 }
