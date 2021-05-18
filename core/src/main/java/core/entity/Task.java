@@ -18,10 +18,10 @@ import java.util.UUID;
 @Table("task")
 public class Task {
     @Id
-    @Column("idi") // todo rename
+    @Column("idt") // todo rename
     private Long idt;
     @NonNull
-    @Column("idic")
+    @Column("idtc")
     private Long idtc; // TasksContainer Id
     @NonNull
     @Column("index_number")
