@@ -1,13 +1,13 @@
 create table if not exists tasks_container
 (
-    idtc           bigserial unique not null,
+    idic           bigserial unique not null,
     name           varchar(50)      not null,
     idp            uuid             not null,
 
     index_number   int              not null, /* for saving order place */
     can_be_deleted boolean default true,
 
-    constraint tasks_container_pkey primary key (idtc),
+    constraint tasks_container_pkey primary key (idic),
 
     constraint fk_project_id_task_idp
         foreign key (idp)
@@ -98,8 +98,8 @@ $history$ LANGUAGE plpgsql;
 
 create table task
 (
-    idt                bigserial unique not null, /* task id */
-    idtc               bigint           not null, /* task_container id */
+    idi                bigserial unique not null, /* task id */
+    idic               bigint           not null, /* task_container id */
     index_number       int              not null, /* task index in container for saving order place*/
     summary            varchar          not null,
     project_id         uuid             not null,
@@ -123,7 +123,7 @@ create table task
 
     constraint UC_task_projectAndKey unique (project_id, key_number),
 
-    constraint task_pkey primary key (idt),
+    constraint task_pkey primary key (idi),
 
     constraint fk_user_profile_sub_user_id_task_creator_id
         foreign key (creator_id)
@@ -163,8 +163,8 @@ execute procedure task_creating();
 /* see task table */
 create table if not exists tasks_archive
 (
-    idt                   bigint unique not null,
-    idtc                   bigint        not null,
+    idi                    bigint unique not null,
+    idic                   bigint        not null,
     index_number           int           not null,
     summary                varchar       not null,
     project_id             uuid          not null,
@@ -188,7 +188,7 @@ create table if not exists tasks_archive
 
     constraint UC_tasks_archive_projectAndKey unique (project_id, key_number),
 
-    constraint tasks_archive_pkey primary key (idt),
+    constraint tasks_archive_pkey primary key (idi),
 
     constraint fk_up_sub_user_id_tasks_archive_creator_id
         foreign key (creator_id)
@@ -202,9 +202,9 @@ create table if not exists tasks_archive
         foreign key (checker_id)
             references user_profile (sub_user_id),
 
-    constraint fk_tasks_archive_container_idtc_task_idtc
-        foreign key (idtc)
-            references tasks_container (idtc),
+    constraint fk_tasks_archive_container_idic_task_idic
+        foreign key (idic)
+            references tasks_container (idic),
 
     constraint fk_project_project_id_tasks_archive_project_id
         foreign key (project_id)
@@ -215,16 +215,16 @@ create table if not exists tasks_archive
 create table if not exists task_comments
 (
     idc       bigserial unique not null,
-    idt       bigint           not null,
+    idi       bigint           not null,
     comment   jsonb            not null,
     is_edited boolean          not null default 'false',
     author_id varchar          not null,
 
     constraint task_comments_pkey primary key (idc),
 
-    constraint fk_task_idt_task_comments_idt
-        foreign key (idt)
-            references task (idt) on delete cascade,
+    constraint fk_task_idi_task_comments_idi
+        foreign key (idi)
+            references task (idi) on delete cascade,
 
     constraint fk_user_profile_sub_user_id_task_comments_author_id
         foreign key (author_id)
