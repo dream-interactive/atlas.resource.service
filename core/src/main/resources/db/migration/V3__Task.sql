@@ -1,3 +1,14 @@
+/* history */
+create function task_history() returns trigger
+as $history$
+begin
+    insert into task_history(row_history) values (row_to_json(old));
+    return new;
+end;
+$history$ LANGUAGE plpgsql;
+/* history end*/
+
+
 create table if not exists tasks_container
 (
     idic           bigserial unique not null,
@@ -66,21 +77,11 @@ create table task_history_archive
     constraint task_history_archive_pkey primary key (id_history)
 );
 
-create function history() returns trigger
-as
-$history$
-declare
-    tbl_name varchar;
-begin
-    tbl_name := TG_ARGV[0];
-    execute 'insert into ' || tbl_name || '(row_history) values (' || row_to_json(old) || ');';
-    return new;
-end;
-$history$ LANGUAGE plpgsql;
+
 
 create function task_creating() returns trigger
 as
-$history$
+$key$
 declare
     i int;
 begin
@@ -93,7 +94,7 @@ begin
     end if;
     return new;
 end;
-$history$ LANGUAGE plpgsql;
+$key$ LANGUAGE plpgsql;
 
 
 create table task
@@ -146,12 +147,14 @@ create table task
 create trigger task_last_modify
     after update
     on task
+    for each row
 execute procedure last_modify();
 
 create trigger task_history
     before update
     on task
-execute procedure history('task_history');
+    for each row
+execute procedure task_history();
 
 create trigger task_creating
     before insert

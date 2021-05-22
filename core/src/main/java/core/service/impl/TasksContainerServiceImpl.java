@@ -1,6 +1,9 @@
 package core.service.impl;
 
+import api.dto.TaskDTO;
 import api.dto.TasksContainerDTO;
+import api.dto.TasksContainerTransfer;
+import core.dao.TaskDAO;
 import core.entity.Task;
 import core.entity.TasksContainer;
 import core.mapper.TaskMapper;
@@ -16,6 +19,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -25,6 +29,7 @@ public class TasksContainerServiceImpl implements TasksContainerService {
 
     private final TasksContainerRepository repository;
     private final TasksContainerMapper mapper;
+    private final TaskDAO taskDao;
     private final TaskRepository taskRepository;
     private final TaskMapper taskMapper;
     private final Principal principal;
@@ -85,7 +90,16 @@ public class TasksContainerServiceImpl implements TasksContainerService {
 
     @Override
     public Mono<TasksContainerDTO> findOneById(Long idic) {
-        return repository.findByIdtc(idic).map(container -> mapper.toDTO(container, taskMapper));
+        return repository.findByIdtc(idic).flatMap(container ->
+            taskRepository
+                .findAllByIdtc(container.getIdtc())
+                .sort(Comparator.comparingInt(Task::getIndexNumber))
+                .collectList()
+                .map(is -> {
+                  container.setTasks(is);
+                  return container;
+                })
+        ).map(c -> mapper.toDTO(c, taskMapper));
     }
 
     @Override
@@ -122,4 +136,31 @@ public class TasksContainerServiceImpl implements TasksContainerService {
         });
 
   }
+
+  @Override
+  public Mono<TasksContainerDTO> moveTask(Flux<TaskDTO> tasks, Long idtc) {
+
+    return principal.getUID()
+        .flatMap(uid -> {
+          log.debug(String.format(
+              " @method [ Mono<TasksContainerDTO> moveTask(Flux<TaskDTO> tasks, Long idtc) ] ->" +
+                  " @user [ sub = %1$s ]", uid));
+    return tasks
+        .map(taskMapper::toEntity)
+        .flatMap(taskRepository::save)
+        .collectList()
+        .flatMap(task -> this.findOneById(idtc));
+    });
+  }
+
+  @Override
+  public Flux<TasksContainerDTO> transferTask(TasksContainerTransfer tct) {
+
+    Mono<TasksContainerDTO> currentMoveTask = moveTask(Flux.fromIterable(tct.getCurrentTasks()), tct.getCurrentIdtc());
+    Mono<TasksContainerDTO> previouslyMoveTask = moveTask(Flux.fromIterable(tct.getPreviousTasks()), tct.getPreviousIdtc());
+
+    return Flux.zip(currentMoveTask, previouslyMoveTask).flatMap(t -> Flux.just(t.getT1(), t.getT2()));
+  }
+
+
 }

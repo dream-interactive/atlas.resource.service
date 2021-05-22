@@ -1,6 +1,8 @@
 package api.endpoint;
 
+import api.dto.TaskDTO;
 import api.dto.TasksContainerDTO;
+import api.dto.TasksContainerTransfer;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,8 +37,16 @@ public interface TasksContainerEndpoints {
     @ResponseStatus(code = HttpStatus.OK)
     Mono<TasksContainerDTO> update(@RequestBody Mono<TasksContainerDTO> dto);
 
-    @GetMapping("/{idic}")
-    Mono<TasksContainerDTO> findOneById(@PathVariable Long idic);
+    @PutMapping("/{currentIdtc}/move")
+    @ResponseStatus(code = HttpStatus.OK)
+    Mono<TasksContainerDTO> moveTask(@RequestBody Flux<TaskDTO> dto, @PathVariable Long currentIdtc);
+
+    @PutMapping("/transfer")
+    @ResponseStatus(code = HttpStatus.OK)
+    Flux<TasksContainerDTO> transferTask(@RequestBody TasksContainerTransfer transfer);
+
+    @GetMapping("/{idtc}")
+    Mono<TasksContainerDTO> findOneById(@PathVariable Long idtc);
 
     @GetMapping("/projects/{idp}")
     Flux<TasksContainerDTO> findAllByProjectId(@PathVariable UUID idp);

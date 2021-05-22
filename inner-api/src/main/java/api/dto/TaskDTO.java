@@ -34,7 +34,7 @@ public class TaskDTO {
      *   new.key_number := keyN + 1;
      *   return new;
      * */
-    private Long keyNumber;
+    private Integer keyNumber;
     private String assignToId; // assign to user
     @NonNull
     private String creatorId;

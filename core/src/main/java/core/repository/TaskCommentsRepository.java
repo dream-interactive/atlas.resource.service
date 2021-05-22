@@ -8,5 +8,5 @@ import org.springframework.data.repository.reactive.ReactiveCrudRepository;
  * Date: 19.03.2021
  */
 
-public interface IssueCommentsRepository extends ReactiveCrudRepository<TasksContainer, Long> {
+public interface TaskCommentsRepository extends ReactiveCrudRepository<TasksContainer, Long> {
 }

@@ -39,7 +39,7 @@ public class Task {
      *   return new;
      * */
     @Column("key_number")
-    private Long keyNumber;
+    private Integer keyNumber;
     @Column("assign_to_user_id")
     private String assignToId; // assign to user
     @NonNull
