@@ -1,11 +1,10 @@
 create function last_modify() returns trigger
-as $$
-begin
-    NEW.last_modify = current_timestamp;
-    RETURN NEW;
-end;
-$$ LANGUAGE plpgsql;
-
+as $lm$
+    begin
+        NEW.last_modify = current_timestamp;
+        RETURN NEW;
+    end;
+$lm$ LANGUAGE plpgsql;
 
 create table if not exists user_profile
 (

@@ -1,6 +1,8 @@
 package core.endpoint;
 
+import api.dto.TaskDTO;
 import api.dto.TasksContainerDTO;
+import api.dto.TasksContainerTransfer;
 import api.endpoint.TasksContainerEndpoints;
 import core.service.TasksContainerService;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,16 @@ public class TasksContainerEndpointsImpl implements TasksContainerEndpoints {
     @Override
     public Mono<TasksContainerDTO> update(Mono<TasksContainerDTO> dto) {
         return service.update(dto);
+    }
+
+    @Override
+    public Mono<TasksContainerDTO> moveTask(Flux<TaskDTO> dto, Long currentIdtc) {
+        return service.moveTask(dto, currentIdtc);
+    }
+
+    @Override
+    public Flux<TasksContainerDTO> transferTask(TasksContainerTransfer transfer) {
+        return service.transferTask(transfer);
     }
 
     @Override

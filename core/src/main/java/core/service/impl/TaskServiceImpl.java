@@ -42,11 +42,11 @@ public class TaskServiceImpl implements TaskService {
                     })
                     .flatMap(task -> repository
                         .save(task)
-                        .map(t -> {
-                            log.debug(String.format(
-                                " @method [ Mono<TaskDTO> create(Mono<TaskDTO> dto) ] ->" +
-                                " @body after saving [ task = %1$s ]", t));
-                            return mapper.toDTO(t);
+                        .flatMap(t -> {
+                          log.debug(String.format(
+                              " @method [ Mono<TaskDTO> create(Mono<TaskDTO> dto) ] ->" +
+                                  " @body after saving [ task = %1$s ]", t));
+                          return findOneById(t.getIdt());
                         })
                     );
             });
@@ -59,7 +59,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Mono<TaskDTO> findOneById(Long idi) {
-        return null;
+        return repository.findById(idi).map(mapper::toDTO);
     }
 
     @Override
