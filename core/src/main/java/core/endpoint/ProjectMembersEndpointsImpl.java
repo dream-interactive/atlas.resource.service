@@ -7,6 +7,7 @@ import core.service.ProjectMembersService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
@@ -23,4 +24,10 @@ public class ProjectMembersEndpointsImpl implements ProjectMembersEndpoints {
   public Flux<ProjectMemberDTO> findAllByProjectId(UUID idp) {
     return service.findAllByProjectId(idp);
   }
+
+  @Override
+  public Mono<ProjectMemberDTO> addMember(UUID idp, String email) {
+    return service.addMember(idp, email);
+  }
+
 }

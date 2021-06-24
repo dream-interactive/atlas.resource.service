@@ -14,5 +14,6 @@ import java.util.UUID;
 @Repository
 public interface AtlasUserRepository extends R2dbcRepository<AtlasUser, String> {
     Mono<AtlasUser> findBySub(String sub);
+    Mono<AtlasUser> findByEmail(String email);
 }
 
