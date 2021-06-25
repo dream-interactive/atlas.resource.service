@@ -1,7 +1,7 @@
 plugins {
     id 'java-library'
-    id 'org.springframework.boot' version "2.3.2.RELEASE"
-    id 'io.spring.dependency-management' version "1.0.9.RELEASE"
+    id 'org.springframework.boot' version "2.4.0"
+    id 'io.spring.dependency-management' version "1.0.10.RELEASE"
 }
 repositories {
     mavenCentral()
@@ -23,6 +23,11 @@ subprojects {
 
     test {
         useJUnitPlatform()
+    }
+    dependencies {
+        implementation group: 'org.json', name: 'json', version: '20210307'
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
     }
 
 }
@@ -49,3 +54,4 @@ task stage(){
     dependsOn("cleanAll")
     dependsOn("buildAll")
 }
+
