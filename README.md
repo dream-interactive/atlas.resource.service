@@ -8,6 +8,8 @@
 
 [:heavy_check_mark:] Java 11
 
+[:heavy_check_mark:] Gradle
+
 [:heavy_check_mark:] Spring Boot 2+
 
 [:heavy_check_mark:] Project Reactor (Flux, Mono)
