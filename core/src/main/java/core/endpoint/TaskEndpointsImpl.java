@@ -21,7 +21,6 @@ public class TaskEndpointsImpl implements TaskEndpoints {
 
   @Override
   public Mono<TaskDTO> create(Mono<TaskDTO> dto) {
-   // dto.subscribe(System.out::println);
     return service.create(dto);
   }
 
@@ -32,7 +31,7 @@ public class TaskEndpointsImpl implements TaskEndpoints {
 
   @Override
   public Mono<TaskDTO> findOneByIdt(Long idt) {
-    return null;
+    return service.findOneById(idt);
   }
 
   @Override
